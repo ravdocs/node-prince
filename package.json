@@ -1,9 +1,12 @@
 {
-    "name": "prince",
-    "homepage": "http://github.com/rse/node-prince",
+    "name": "princexml",
+    "homepage": "https://github.com/ravdocs/princexml",
     "description": "Node API for executing XML/HTML to PDF renderer PrinceXML via prince(1) CLI",
-    "version": "1.4.9",
+    "version": "1.4.10",
     "license": "MIT",
+    "publishConfig": {
+        "scope": "ravdocs"
+    },
     "author": {
         "name": "Ralf S. Engelschall",
         "email": "rse@engelschall.com",
@@ -24,7 +27,7 @@
         "url": "git://github.com/rse/node-prince.git"
     },
     "bugs": {
-        "url": "http://github.com/rse/node-prince"
+        "url": "https://github.com/ravdocs/princexml"
     },
     "main": "./prince-api.js",
     "devDependencies": {
