@@ -1,5 +1,5 @@
 
-Node-Prince
+PrinceXML
 ===========
 
 [Node](http://nodejs.org/) API for executing the XML/HTML to PDF renderer
@@ -53,7 +53,8 @@ Usage
 -----
 
 ```js
-var Prince = require("prince");
+var Prince = require('@ravdocs/princexml');
+var util = require('utils');
 
 Prince()
     .inputs("test.html")
@@ -133,8 +134,8 @@ Companion Grunt task [grunt-princess](https://github.com/rse/grunt-princess)
 License
 -------
 
-Copyright (c) 2014-2018 Ralf S. Engelschall (http://engelschall.com/)
-Copyright (c) 2018 RAVdocs (http://ravdocs.com/)
+- Copyright (c) 2014-2018 Ralf S. Engelschall (http://engelschall.com/)
+- Copyright (c) 2018 RAVdocs (http://ravdocs.com/)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
