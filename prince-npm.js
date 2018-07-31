@@ -77,12 +77,14 @@ var princeDownloadURL = function () {
     return new promise(function (resolve /*, reject */) {
         var id = process.arch + "-" + process.platform;
         if (id.match(/^ia32-win32$/))
-            resolve("https://www.princexml.com/download/prince-11.3.2-win32-setup.exe");
+            resolve("https://www.princexml.com/download/prince-12-win32-setup.exe");
         else if (id.match(/^x64-win32$/))
-            resolve("https://www.princexml.com/download/prince-11.3.2-win64-setup.exe");
+            resolve("https://www.princexml.com/download/prince-12-win64-setup.exe");
         else if (id.match(/^(?:ia32|x64)-darwin/))
-            resolve("https://www.princexml.com/download/prince-11.3-macosx.tar.gz");
+            resolve("https://www.princexml.com/download/prince-12-macosx.tar.gz");
         else {
+
+            // todo: move away from `shtool` to https://nodejs.org/api/os.html
             child_process.exec("sh \"" + __dirname + "/shtool\" platform -t binary", function (error, stdout /*, stderr */) {
                 if (error) {
                     console.log(chalk.red("ERROR: failed to determine platform details on platform \"" + id + "\": " + error));
@@ -90,32 +92,35 @@ var princeDownloadURL = function () {
                 }
                 var platform = stdout.toString().replace(/^(\S+).*\n?$/, "$1");
                 if (id.match(/^(?:ia32|x64)-linux/)) {
-                    if (platform.match(/^ix86-ubuntu1[23](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-ubuntu12.04-i386.tar.gz");
-                    else if (platform.match(/^amd64-ubuntu1[23](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-ubuntu12.04-amd64.tar.gz");
-                    else if (platform.match(/^ix86-ubuntu1[45](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-ubuntu14.04-i386.tar.gz");
+                    if (platform.match(/^ix86-ubuntu1[45](?:\.\d+)*$/))
+                        resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-i386.tar.gz");
                     else if (platform.match(/^amd64-ubuntu1[45](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-ubuntu14.04-amd64.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-amd64.tar.gz");
                     else if (platform.match(/^ix86-ubuntu1[67](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-ubuntu16.04-i386.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-ubuntu16.04-i386.tar.gz");
                     else if (platform.match(/^amd64-ubuntu1[67](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-ubuntu16.04-amd64.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-ubuntu12.04-i386.tar.gz");
+
+                        // todo: support latest ubuntu builds
+
                     else if (platform.match(/^amd64-debian8(?:\.\d+)*$/))
                         resolve("https://www.princexml.com/download/prince-11.3-debian8.0-amd64.tar.gz");
                     else if (platform.match(/^amd64-debian7(?:\.\d+)*$/))
                         resolve("https://www.princexml.com/download/prince-11.3-debian7.4-amd64.tar.gz");
+
+
                     else if (platform.match(/^amd64-centos7(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-centos7-x86_64.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-centos7-x86_64.tar.gz");
                     else if (platform.match(/^amd64-centos6(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-centos6-x86_64.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-centos6-x86_64.tar.gz");
                     else if (platform.match(/^ix86-centos6(?:\.\d+)*$/))
                         resolve("https://www.princexml.com/download/prince-11.3-centos6-i386.tar.gz");
+
+
                     else if (id.match(/^ia32-/))
-                        resolve("https://www.princexml.com/download/prince-11.3-linux-generic-i686.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-linux-generic-i686.tar.gz");
                     else if (id.match(/^x64-/))
-                        resolve("https://www.princexml.com/download/prince-11.3-linux-generic-x86_64.tar.gz");
+                        resolve("https://www.princexml.com/download/prince-12-linux-generic-x86_64.tar.gz");
                 }
                 else if (id.match(/^ia32-freebsd/))
                     resolve("https://www.princexml.com/download/prince-10r7-freebsd10.1-i386-static.tar.gz");
