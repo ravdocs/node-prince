@@ -52,15 +52,11 @@ var mkdirp        = require("mkdirp");
 var princeInfo = function () {
     return new promise(function (resolve, reject) {
         which("prince", function (error, filename) {
-            if (error) {
-                reject("prince(1) not found in PATH: " + error);
-                return;
-            }
+            if (error) return reject("prince(1) not found in PATH: " + error);
+
             child_process.execFile(filename, [ "--version" ], function (error, stdout, stderr) {
-                if (error !== null) {
-                    reject("prince(1) failed on \"--version\": " + error);
-                    return;
-                }
+                if (error) return reject("prince(1) failed on \"--version\": " + error);
+
                 var m = stdout.match(/^Prince\s+(\d+(?:\.\d+)?)/);
                 if (!(m !== null && typeof m[1] !== "undefined")) {
                     reject("prince(1) returned unexpected output on \"--version\":\n" + stdout + stderr);
@@ -219,11 +215,12 @@ if (process.argv[2] === "install") {
         console.log("-- found prince(1) command: " + chalk.blue(prince.command));
         console.log("-- found prince(1) version: " + chalk.blue(prince.version));
     }, function (/* error */) {
+        console.log("++ no globally installed PrinceXML found");
         console.log("++ downloading PrinceXML distribution");
         princeDownloadURL().then(function (url) {
             downloadData(url).then(function (data) {
-                console.log("++ locally unpacking PrinceXML distribution");
                 destdir = path.join(__dirname, "prince");
+                console.log("++ locally unpacking PrinceXML distribution to " + destdir);
                 var destfile;
                 if (process.platform === "win32") {
                     destfile = path.join(__dirname, "prince.exe");
