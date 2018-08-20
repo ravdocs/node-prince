@@ -50,6 +50,6 @@
   "scripts": {
     "install": "node ./prince-npm.js install",
     "uninstall": "node ./prince-npm.js uninstall",
-    "test": "node ./test.js"
+    "test": "node ./test/test.js"
   }
 }

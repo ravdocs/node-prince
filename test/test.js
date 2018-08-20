@@ -23,11 +23,11 @@
 */
 
 var util   = require("util");
-var Prince = require("./prince-api.js");
+var Prince = require("../prince-api.js");
 
 Prince()
-    .inputs("test.html")
-    .output("test.pdf")
+    .inputs("./test/test.html")
+    .output("./test/test.pdf")
     .execute()
     .then(function () {
         console.log("OK: done");
