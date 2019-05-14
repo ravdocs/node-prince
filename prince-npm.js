@@ -200,7 +200,7 @@ var extractTarball = function (tarball, destdir, stripdirs) {
             .pipe(zlib.createGunzip())
             .pipe(tar.extract({ cwd: destdir, strip: stripdirs }))
             .on("error", function (error) { reject(error); })
-            .on("close", function () { /* global setTimeout: true */ setTimeout(function () { resolve(); }, 500); });
+            .on("close", function () { console.log('Extracted tarball'); /* global setTimeout: true */ setTimeout(function () { resolve(); }, 500); });
     });
 };
 
