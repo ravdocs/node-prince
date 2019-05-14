@@ -86,7 +86,9 @@ var princeDownloadURL = function () {
                     console.log(chalk.red("ERROR: failed to determine platform details on platform \"" + id + "\": " + error));
                     process.exit(1);
                 }
+                console.log('princexml stdout:', stdout);
                 var platform = stdout.toString().replace(/^(\S+).*\n?$/, "$1");
+                console.log('princexml platform:', platform);
                 if (id.match(/^(?:ia32|x64)-linux/)) {
                     if (platform.match(/^ix86-ubuntu1[45](?:\.\d+)*$/))
                         resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-i386.tar.gz");
@@ -276,4 +278,3 @@ else {
     console.log(chalk.red("ERROR: invalid argument"));
     process.exit(1);
 }
-
