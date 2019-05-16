@@ -31,254 +31,230 @@
 /*
  *  prince-npm.js: NPM install-time integration
  */
+'use strict';
 
 /*  core requirements  */
 var child_process = require("child_process");
-var fs            = require("fs");
-var path          = require("path");
-var zlib          = require("zlib");
+var fs = require("fs");
+var path = require("path");
+var zlib = require("zlib");
 
 /*  extra requirements  */
-var progress      = require("progress");
-var promise       = require("promise");
-var request       = require("request");
-var which         = require("which");
-var chalk         = require("chalk");
-var tar           = require("tar");
-var rimraf        = require("rimraf");
-var mkdirp        = require("mkdirp");
+var Progress = require("progress");
+var Promise = require("promise");
+var request = require("request");
+var which = require("which");
+var chalk = require("chalk");
+var tar = require("tar");
+var rimraf = require("rimraf");
+var mkdirp = require("mkdirp");
 
 /*  determine path and version of prince(1)  */
 var princeInfo = function () {
-    return new promise(function (resolve, reject) {
-        which("prince", function (error, filename) {
-            if (error) return reject("prince(1) not found in PATH: " + error);
+	return new Promise(function (resolve, reject) {
+		which("prince", function (error, filename) {
+			if (error) return reject("prince(1) not found in PATH: " + error);
 
-            child_process.execFile(filename, [ "--version" ], function (error, stdout, stderr) {
-                if (error) return reject("prince(1) failed on \"--version\": " + error);
+			child_process.execFile(filename, ["--version"], function (error, stdout, stderr) {
+				if (error) return reject("prince(1) failed on \"--version\": " + error);
 
-                var m = stdout.match(/^Prince\s+(\d+(?:\.\d+)?)/);
-                if (!(m !== null && typeof m[1] !== "undefined")) {
-                    reject("prince(1) returned unexpected output on \"--version\":\n" + stdout + stderr);
-                    return;
-                }
-                resolve({ command: filename, version: m[1] });
-            });
-        });
-    });
+				var m = stdout.match(/^Prince\s+(\d+(?:\.\d+)?)/);
+				if (!(m !== null && typeof m[1] !== "undefined")) {
+					reject("prince(1) returned unexpected output on \"--version\":\n" + stdout + stderr);
+					return;
+				}
+				resolve({command: filename, version: m[1]});
+			});
+		});
+	});
 };
 
 /*  return download URL for latest PrinceXML distribution  */
 var princeDownloadURL = function () {
-    return new promise(function (resolve /*, reject */) {
-        var id = process.arch + "-" + process.platform;
-        if (id.match(/^ia32-win32$/))
-            resolve("https://www.princexml.com/download/prince-12-win32-setup.exe");
-        else if (id.match(/^x64-win32$/))
-            resolve("https://www.princexml.com/download/prince-12-win64-setup.exe");
-        else if (id.match(/^(?:ia32|x64)-darwin/))
-            resolve("https://www.princexml.com/download/prince-12-macosx.tar.gz");
-        else {
+	return new Promise(function (resolve /*, reject */) {
+		var id = process.arch + "-" + process.platform;
+		if (id.match(/^ia32-win32$/)) resolve("https://www.princexml.com/download/prince-12-win32-setup.exe");
+		else if (id.match(/^x64-win32$/)) resolve("https://www.princexml.com/download/prince-12-win64-setup.exe");
+		else if (id.match(/^(?:ia32|x64)-darwin/)) resolve("https://www.princexml.com/download/prince-12-macosx.tar.gz");
+		else {
 
-            // todo: move away from `shtool` to https://nodejs.org/api/os.html
-            child_process.exec("sh \"" + __dirname + "/shtool\" platform -t binary", function (error, stdout /*, stderr */) {
-                if (error) {
-                    console.log(chalk.red("ERROR: failed to determine platform details on platform \"" + id + "\": " + error));
-                    process.exit(1);
-                }
-                console.log("princexml stdout:", stdout);// dev
-                var platform = stdout.toString().replace(/^(\S+).*\n?$/, "$1");
-                console.log("princexml platform:", platform);// dev
-                if (id.match(/^(?:ia32|x64)-linux/)) {
-                    if (platform.match(/^ix86-ubuntu1[45](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-i386.tar.gz");
-                    else if (platform.match(/^amd64-ubuntu1[45](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-amd64.tar.gz");
-                    else if (platform.match(/^ix86-ubuntu1[67](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-12-ubuntu16.04-i386.tar.gz");
-                    else if (platform.match(/^amd64-ubuntu1[67](?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-12-ubuntu12.04-i386.tar.gz");
+			// todo: move away from `shtool` to https://nodejs.org/api/os.html
+			child_process.exec("sh \"" + __dirname + "/shtool\" platform -t binary", function (error, stdout /*, stderr */) {
+				if (error) {
+					console.log(chalk.red("ERROR: failed to determine platform details on platform \"" + id + "\": " + error));
+					process.exit(1);
+				}
+				console.log("princexml stdout:", stdout);// dev
+				var platform = stdout.toString().replace(/^(\S+).*\n?$/, "$1");
+				console.log("princexml platform:", platform);// dev
+				if (id.match(/^(?:ia32|x64)-linux/)) {
+					if (platform.match(/^ix86-ubuntu1[45](?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-i386.tar.gz");
+					else if (platform.match(/^amd64-ubuntu1[45](?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-amd64.tar.gz");
+					else if (platform.match(/^ix86-ubuntu1[67](?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-12-ubuntu16.04-i386.tar.gz");
+					else if (platform.match(/^amd64-ubuntu1[67](?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-12-ubuntu12.04-i386.tar.gz");
 
-                        // todo: support latest ubuntu builds
+					// todo: support latest ubuntu builds
 
-                    else if (platform.match(/^amd64-debian8(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-debian8.0-amd64.tar.gz");
-                    else if (platform.match(/^amd64-debian7(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-debian7.4-amd64.tar.gz");
+					else if (platform.match(/^amd64-debian8(?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-11.3-debian8.0-amd64.tar.gz");
+					else if (platform.match(/^amd64-debian7(?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-11.3-debian7.4-amd64.tar.gz");
 
 
-                    else if (platform.match(/^amd64-centos7(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-12-centos7-x86_64.tar.gz");
-                    else if (platform.match(/^amd64-centos6(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-12-centos6-x86_64.tar.gz");
-                    else if (platform.match(/^ix86-centos6(?:\.\d+)*$/))
-                        resolve("https://www.princexml.com/download/prince-11.3-centos6-i386.tar.gz");
+					else if (platform.match(/^amd64-centos7(?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-12-centos7-x86_64.tar.gz");
+					else if (platform.match(/^amd64-centos6(?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-12-centos6-x86_64.tar.gz");
+					else if (platform.match(/^ix86-centos6(?:\.\d+)*$/)) resolve("https://www.princexml.com/download/prince-11.3-centos6-i386.tar.gz");
 
 
-                    else if (id.match(/^ia32-/))
-                        resolve("https://www.princexml.com/download/prince-12-linux-generic-i686.tar.gz");
-                    else if (id.match(/^x64-/))
-                        resolve("https://www.princexml.com/download/prince-12-linux-generic-x86_64.tar.gz");
-                }
-                else if (id.match(/^ia32-freebsd/))
-                    resolve("https://www.princexml.com/download/prince-10r7-freebsd10.1-i386-static.tar.gz");
-                else if (id.match(/^x64-freebsd/))
-                    resolve("https://www.princexml.com/download/prince-11.3-freebsd11.0-amd64.tar.gz");
-                else if (id.match(/^(?:ia32|x64)-sunos/))
-                    resolve("https://www.princexml.com/download/prince-10r7-sol11x86.tar.gz");
-                else {
-                    console.log(chalk.red("ERROR: PrinceXML not available for platform \"" + platform + "\""));
-                    process.exit(1);
-                }
-            });
-        }
-    });
+					else if (id.match(/^ia32-/)) resolve("https://www.princexml.com/download/prince-12-linux-generic-i686.tar.gz");
+					else if (id.match(/^x64-/)) resolve("https://www.princexml.com/download/prince-12-linux-generic-x86_64.tar.gz");
+				} else if (id.match(/^ia32-freebsd/)) resolve("https://www.princexml.com/download/prince-10r7-freebsd10.1-i386-static.tar.gz");
+				else if (id.match(/^x64-freebsd/)) resolve("https://www.princexml.com/download/prince-11.3-freebsd11.0-amd64.tar.gz");
+				else if (id.match(/^(?:ia32|x64)-sunos/)) resolve("https://www.princexml.com/download/prince-10r7-sol11x86.tar.gz");
+				else {
+					console.log(chalk.red("ERROR: PrinceXML not available for platform \"" + platform + "\""));
+					process.exit(1);
+				}
+			});
+		}
+	});
 };
 
 /*  download data from URL  */
 var downloadData = function (url) {
-    return new promise(function (resolve, reject) {
-        var options = {
-            method: "GET",
-            url: url,
-            encoding: null,
-            headers: {
-                "User-Agent": "node-prince (prince-npm.js:install)"
-            }
-        };
-        (new promise(function (resolve /*, reject  */) {
-            if (typeof process.env.http_proxy === "string" && process.env.http_proxy !== "") {
-                options.proxy = process.env.http_proxy;
-                console.log("-- using proxy ($http_proxy): " + options.proxy);
-                resolve();
-            }
-            else {
-                child_process.exec("npm config get proxy", function (error, stdout /*, stderr */) {
-                    if (error === null) {
-                        stdout = stdout.toString().replace(/\r?\n$/, "");
-                        if (stdout.match(/^https?:\/\/.+/)) {
-                            options.proxy = stdout;
-                            console.log("-- using proxy (npm config get proxy): " + options.proxy);
-                        }
-                    }
-                    resolve();
-                });
-            }
-        })).then(function () {
-            console.log("-- download: " + url);
-            var req = request(options, function (error, response, body) {
-                if (!error && response.statusCode === 200) {
-                    console.log("-- download: " + body.length + " bytes received.");
-                    resolve(body);
-                }
-                else
-                    reject("download failed: " + error);
-            });
-            var progress_bar = null;
-            req.on("response", function (response) {
-                var len = parseInt(response.headers["content-length"], 10);
-                progress_bar = new progress(
-                    "-- download: [:bar] :percent (ETA: :etas)", {
-                    complete:   "#",
-                    incomplete: "=",
-                    width:      40,
-                    total:      len
-                });
-            });
-            req.on("data", function (data) {
-                if (progress_bar !== null)
-                    progress_bar.tick(data.length);
-            });
-        });
-    });
+	return new Promise(function (resolve, reject) {
+		var options = {
+			method: "GET",
+			url: url,
+			encoding: null,
+			headers: {
+				"User-Agent": "node-prince (prince-npm.js:install)"
+			}
+		};
+		(new Promise(function (resolve /*, reject  */) {
+			if (typeof process.env.http_proxy === "string" && process.env.http_proxy !== "") {
+				options.proxy = process.env.http_proxy;
+				console.log("-- using proxy ($http_proxy): " + options.proxy);
+				resolve();
+			} else {
+				child_process.exec("npm config get proxy", function (error, stdout /*, stderr */) {
+					if (error === null) {
+						stdout = stdout.toString().replace(/\r?\n$/, "");
+						if (stdout.match(/^https?:\/\/.+/)) {
+							options.proxy = stdout;
+							console.log("-- using proxy (npm config get proxy): " + options.proxy);
+						}
+					}
+					resolve();
+				});
+			}
+		})).then(function () {
+			console.log("-- download: " + url);
+			var req = request(options, function (error, response, body) {
+				if (!error && response.statusCode === 200) {
+					console.log("-- download: " + body.length + " bytes received.");
+					resolve(body);
+				} else reject("download failed: " + error);
+			});
+			var progress_bar = null;
+			req.on("response", function (response) {
+				var len = parseInt(response.headers["content-length"], 10);
+				progress_bar = new Progress(
+					"-- download: [:bar] :percent (ETA: :etas)", {
+						complete: "#",
+						incomplete: "=",
+						width: 40,
+						total: len
+					}
+				);
+			});
+			req.on("data", function (data) {
+				if (progress_bar !== null) progress_bar.tick(data.length);
+			});
+		});
+	});
 };
 
 /*  extract a tarball (*.tar.gz)  */
 var extractTarball = function (tarball, destdir, stripdirs) {
-    return new promise(function (resolve, reject) {
-        fs.createReadStream(tarball)
-            .pipe(zlib.createGunzip())
-            .pipe(tar.extract({ cwd: destdir, strip: stripdirs }))
-            .on("error", function (error) { reject(error); })
-            .on("close", function () {
-                console.log("Extracted tarball"); // dev
-                /* global setTimeout: true */
-                setTimeout(function () { resolve(); }, 500);
-            });
-    });
+	return new Promise(function (resolve, reject) {
+		fs.createReadStream(tarball)
+			.pipe(zlib.createGunzip())
+			.pipe(tar.extract({cwd: destdir, strip: stripdirs}))
+			.on("error", function (error) {
+				reject(error);
+			})
+			.on("close", function () {
+				console.log("Extracted tarball"); // dev
+				/* global setTimeout: true */
+				setTimeout(function () {
+					resolve();
+				}, 500);
+			});
+	});
 };
 
 /*  main procedure  */
 if (process.argv.length !== 3) {
-    console.log(chalk.red("ERROR: invalid number of arguments"));
-    process.exit(1);
+	console.log(chalk.red("ERROR: invalid number of arguments"));
+	process.exit(1);
 }
 var destdir;
 if (process.argv[2] === "install") {
-    /*  installation procedure  */
-    console.log("++ checking for globally installed PrinceXML");
-    princeInfo().then(function (prince) {
-        console.log("-- found prince(1) command: " + chalk.blue(prince.command));
-        console.log("-- found prince(1) version: " + chalk.blue(prince.version));
-    }, function (/* error */) {
-        console.log("++ no globally installed PrinceXML found");
-        console.log("++ downloading PrinceXML distribution");
-        princeDownloadURL().then(function (url) {
-            downloadData(url).then(function (data) {
-                destdir = path.join(__dirname, "prince");
-                console.log("++ locally unpacking PrinceXML distribution to " + destdir);
-                var destfile;
-                if (process.platform === "win32") {
-                    destfile = path.join(__dirname, "prince.exe");
-                    fs.writeFileSync(destfile, data, { encoding: null });
-                    var args = [ "/s", "/a", "/vTARGETDIR=\"" + path.resolve(destdir) + "\" /qn" ];
-                    child_process.execFile(destfile, args, function (error, stdout, stderr) {
-                        if (error !== null) {
-                            console.log(chalk.red("** ERROR: failed to extract: " + error));
-                            stdout = stdout.toString();
-                            stderr = stderr.toString();
-                            if (stdout !== "")
-                                console.log("** STDOUT: " + stdout);
-                            if (stderr !== "")
-                                console.log("** STDERR: " + stderr);
-                        }
-                        else {
-                            fs.unlinkSync(destfile);
-                            console.log("-- OK: local PrinceXML installation now available");
-                        }
-                    });
-                }
-                else {
-                    destfile = path.join(__dirname, "prince.tgz");
-                    fs.writeFileSync(destfile, data, { encoding: null });
-                    mkdirp.sync(destdir);
-                    extractTarball(destfile, destdir, 1).then(function () {
-                        fs.unlinkSync(destfile);
-                        console.log("-- OK: local PrinceXML installation now available");
-                    }, function (error) {
-                        console.log(chalk.red("** ERROR: failed to extract: " + error));
-                    });
-                }
-            }, function (error) {
-                console.log(chalk.red("** ERROR: failed to download: " + error));
-            });
-        });
-    });
-}
-else if (process.argv[2] === "uninstall") {
-    /*  uninstallation procedure  */
-    destdir = path.join(__dirname, "prince");
-    if (fs.existsSync(destdir)) {
-        console.log("++ deleting locally unpacked PrinceXML distribution");
-        rimraf(destdir, function (error) {
-            if (error !== null)
-                console.log(chalk.red("** ERROR: " + error));
-            else
-                console.log("-- OK: done");
-        });
-    }
-}
-else {
-    console.log(chalk.red("ERROR: invalid argument"));
-    process.exit(1);
+	/*  installation procedure  */
+	console.log("++ checking for globally installed PrinceXML");
+	princeInfo().then(function (prince) {
+		console.log("-- found prince(1) command: " + chalk.blue(prince.command));
+		console.log("-- found prince(1) version: " + chalk.blue(prince.version));
+	}, function (/* error */) {
+		console.log("++ no globally installed PrinceXML found");
+		console.log("++ downloading PrinceXML distribution");
+		princeDownloadURL().then(function (url) {
+			downloadData(url).then(function (data) {
+				destdir = path.join(__dirname, "prince");
+				console.log("++ locally unpacking PrinceXML distribution to " + destdir);
+				var destfile;
+				if (process.platform === "win32") {
+					destfile = path.join(__dirname, "prince.exe");
+					fs.writeFileSync(destfile, data, {encoding: null});
+					var args = ["/s", "/a", "/vTARGETDIR=\"" + path.resolve(destdir) + "\" /qn"];
+					child_process.execFile(destfile, args, function (error, stdout, stderr) {
+						if (error !== null) {
+							console.log(chalk.red("** ERROR: failed to extract: " + error));
+							stdout = stdout.toString();
+							stderr = stderr.toString();
+							if (stdout !== "") console.log("** STDOUT: " + stdout);
+							if (stderr !== "") console.log("** STDERR: " + stderr);
+						} else {
+							fs.unlinkSync(destfile);
+							console.log("-- OK: local PrinceXML installation now available");
+						}
+					});
+				} else {
+					destfile = path.join(__dirname, "prince.tgz");
+					fs.writeFileSync(destfile, data, {encoding: null});
+					mkdirp.sync(destdir);
+					extractTarball(destfile, destdir, 1).then(function () {
+						fs.unlinkSync(destfile);
+						console.log("-- OK: local PrinceXML installation now available");
+					}, function (error) {
+						console.log(chalk.red("** ERROR: failed to extract: " + error));
+					});
+				}
+			}, function (error) {
+				console.log(chalk.red("** ERROR: failed to download: " + error));
+			});
+		});
+	});
+} else if (process.argv[2] === "uninstall") {
+	/*  uninstallation procedure  */
+	destdir = path.join(__dirname, "prince");
+	if (fs.existsSync(destdir)) {
+		console.log("++ deleting locally unpacked PrinceXML distribution");
+		rimraf(destdir, function (error) {
+			if (error !== null) console.log(chalk.red("** ERROR: " + error));
+			else console.log("-- OK: done");
+		});
+	}
+} else {
+	console.log(chalk.red("ERROR: invalid argument"));
+	process.exit(1);
 }
