@@ -27,6 +27,7 @@
   },
   "main": "./prince-api.js",
   "devDependencies": {
+    "@ravdocs/eslint": "^1.0.7",
     "grunt": "^1.0.4",
     "grunt-contrib-jshint": "^2.1.0",
     "grunt-eslint": "^21.0.0"
@@ -47,7 +48,8 @@
   },
   "scripts": {
     "install": "node ./prince-npm.js install",
-    "uninstall": "node ./prince-npm.js uninstall",
-    "test": "node ./test/test.js"
+    "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
+    "test": "node ./test/test.js",
+    "uninstall": "node ./prince-npm.js uninstall"
   }
 }
