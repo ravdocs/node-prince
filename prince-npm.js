@@ -86,9 +86,9 @@ var princeDownloadURL = function () {
                     console.log(chalk.red("ERROR: failed to determine platform details on platform \"" + id + "\": " + error));
                     process.exit(1);
                 }
-                console.log('princexml stdout:', stdout);
+                console.log("princexml stdout:", stdout);// dev
                 var platform = stdout.toString().replace(/^(\S+).*\n?$/, "$1");
-                console.log('princexml platform:', platform);
+                console.log("princexml platform:", platform);// dev
                 if (id.match(/^(?:ia32|x64)-linux/)) {
                     if (platform.match(/^ix86-ubuntu1[45](?:\.\d+)*$/))
                         resolve("https://www.princexml.com/download/prince-12-ubuntu14.04-i386.tar.gz");
@@ -200,7 +200,11 @@ var extractTarball = function (tarball, destdir, stripdirs) {
             .pipe(zlib.createGunzip())
             .pipe(tar.extract({ cwd: destdir, strip: stripdirs }))
             .on("error", function (error) { reject(error); })
-            .on("close", function () { console.log('Extracted tarball'); /* global setTimeout: true */ setTimeout(function () { resolve(); }, 500); });
+            .on("close", function () {
+                console.log("Extracted tarball"); // dev
+                /* global setTimeout: true */
+                setTimeout(function () { resolve(); }, 500);
+            });
     });
 };
 
