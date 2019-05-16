@@ -53,14 +53,16 @@ var mkdirp = require("mkdirp");
 var princeInfo = function () {
 	return new Promise(function (resolve, reject) {
 		which("prince", function (error, filename) {
-			if (error) return reject("prince(1) not found in PATH: " + error);
+			if (error) error.message = "prince(1) not found in PATH: " + error.message;
+			if (error) return reject(error);
 
 			child_process.execFile(filename, ["--version"], function (error, stdout, stderr) {
-				if (error) return reject("prince(1) failed on \"--version\": " + error);
+				if (error) error.message = "prince(1) failed on \"--version\": " + error.message;
+				if (error) return reject(error);
 
 				var m = stdout.match(/^Prince\s+(\d+(?:\.\d+)?)/);
 				if (!(m !== null && typeof m[1] !== "undefined")) {
-					reject("prince(1) returned unexpected output on \"--version\":\n" + stdout + stderr);
+					reject(new Error("prince(1) returned unexpected output on \"--version\":\n" + stdout + stderr));
 					return;
 				}
 				resolve({command: filename, version: m[1]});
@@ -149,10 +151,12 @@ var downloadData = function (url) {
 		})).then(function () {
 			console.log("-- download: " + url);
 			var req = request(options, function (error, response, body) {
-				if (!error && response.statusCode === 200) {
-					console.log("-- download: " + body.length + " bytes received.");
-					resolve(body);
-				} else reject("download failed: " + error);
+				if (error) error.message = "download failed: " + error.message;
+				if (error) return reject(error);
+				if (response.statusCode !== 200) return reject(new Error("download failed with status: " + response.statusCode));
+
+				console.log("-- download: " + body.length + " bytes received.");
+				resolve(body);
 			});
 			var progress_bar = null;
 			req.on("response", function (response) {
