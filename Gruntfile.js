@@ -25,7 +25,6 @@
 /* global module: true */
 module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-jshint");
-    grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-eslint");
 
     grunt.initConfig({
@@ -42,13 +41,8 @@ module.exports = function (grunt) {
                 configFile: "eslint.json"
             },
             target: [ "prince-api.js", "prince-npm.js" ],
-        },
-        clean: {
-            clean: [],
-            distclean: [ "node_modules" ]
         }
     });
 
     grunt.registerTask("default", [ "jshint", "eslint" ]);
 };
-
