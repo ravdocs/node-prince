@@ -39,7 +39,7 @@ var util          = require("util");
 
 /*  extra requirements  */
 var promise       = require("promise");
-var _             = require("lodash");
+var forOwn        = require("lodash.forown");
 
 /*  the officially support options of prince(1)  */
 var princeOptions = {
@@ -293,7 +293,7 @@ Prince.prototype.execute = function () {
         args.push("--license-file");
         args.push(this.config.license);
     }
-    _.forOwn(this.config.option, function (value, name) {
+    forOwn(this.config.option, function (value, name) {
         args.push("--" + name);
         if (value !== true)
             args.push(value);
@@ -318,4 +318,3 @@ Prince.prototype.execute = function () {
 
 /*  export API constructor  */
 module.exports = Prince;
-
