@@ -243,13 +243,27 @@ Prince.prototype._execute = function (method, args) {
 			options.encoding = "buffer";
 			child_process.execFile(prog, args, options,
 				function (error, stdout, stderr) {
-					var m;
-					if (error === null && (m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/))) reject({error: m[1], stdout: stdout, stderr: stderr});
-					else if (error !== null) reject({error: error, stdout: stdout, stderr: stderr});
-					else resolve({stdout: stdout, stderr: stderr});
+					if (error) {
+						error.stdout = stdout;
+						error.stderr = stderr;
+						return reject(error);
+					}
+
+					var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
+
+					if (m) {
+						error = new Error(m[1]);
+						error.stdout = stdout;
+						error.stderr = stderr;
+						return reject(error);
+					}
+
+					resolve({stdout: stdout, stderr: stderr});
 				});
-		} catch (exception) {
-			reject({error: exception, stdout: "", stderr: ""});
+		} catch (error) {
+			error.stdout = "";
+			error.stderr = "";
+			reject(error);
 		}
 	});
 };
