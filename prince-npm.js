@@ -73,7 +73,7 @@ var princeInfo = function () {
 
 /*  return download URL for latest PrinceXML distribution  */
 var princeDownloadURL = function () {
-	return new Promise(function (resolve /*, reject */) {
+	return new Promise(function (resolve, reject) {
 		var id = process.arch + "-" + process.platform;
 		if (id.match(/^ia32-win32$/)) resolve("https://www.princexml.com/download/prince-12-win32-setup.exe");
 		else if (id.match(/^x64-win32$/)) resolve("https://www.princexml.com/download/prince-12-win64-setup.exe");
@@ -82,10 +82,8 @@ var princeDownloadURL = function () {
 
 			// todo: move away from `shtool` to https://nodejs.org/api/os.html
 			child_process.exec("sh \"" + __dirname + "/shtool\" platform -t binary", function (error, stdout /*, stderr */) {
-				if (error) {
-					console.log(chalk.red("ERROR: failed to determine platform details on platform \"" + id + "\": " + error));
-					process.exit(1);
-				}
+				if (error) error.message = "ERROR: failed to determine platform details on platform \"" + id + "\": " + error.message;
+				if (error) return reject(error);
 				console.log("princexml stdout:", stdout);// dev
 				var platform = stdout.toString().replace(/^(\S+).*\n?$/, "$1");
 				console.log("princexml platform:", platform);// dev
@@ -112,8 +110,7 @@ var princeDownloadURL = function () {
 				else if (id.match(/^x64-freebsd/)) resolve("https://www.princexml.com/download/prince-11.3-freebsd11.0-amd64.tar.gz");
 				else if (id.match(/^(?:ia32|x64)-sunos/)) resolve("https://www.princexml.com/download/prince-10r7-sol11x86.tar.gz");
 				else {
-					console.log(chalk.red("ERROR: PrinceXML not available for platform \"" + platform + "\""));
-					process.exit(1);
+					reject(new Error("ERROR: PrinceXML not available for platform \"" + platform + "\""));
 				}
 			});
 		}
@@ -199,7 +196,7 @@ var extractTarball = function (tarball, destdir, stripdirs) {
 /*  main procedure  */
 if (process.argv.length !== 3) {
 	console.log(chalk.red("ERROR: invalid number of arguments"));
-	process.exit(1);
+	process.exit(1); // eslint-disable-line no-process-exit
 }
 var destdir;
 if (process.argv[2] === "install") {
@@ -245,7 +242,11 @@ if (process.argv[2] === "install") {
 				}
 			}, function (error) {
 				console.log(chalk.red("** ERROR: failed to download: " + error));
+				process.exit(1); // eslint-disable-line no-process-exit
 			});
+		}, function(error) {
+			console.log(chalk.red("** ERROR: failed to find download url: " + error));
+			process.exit(1); // eslint-disable-line no-process-exit
 		});
 	});
 } else if (process.argv[2] === "uninstall") {
@@ -260,5 +261,5 @@ if (process.argv[2] === "install") {
 	}
 } else {
 	console.log(chalk.red("ERROR: invalid argument"));
-	process.exit(1);
+	process.exit(1); // eslint-disable-line no-process-exit
 }
