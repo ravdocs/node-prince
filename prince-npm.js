@@ -52,13 +52,13 @@ var mkdirp = require('mkdirp');
 /*  determine path and version of prince(1)  */
 var princeInfo = function () {
 	return new Promise(function (resolve, reject) {
-		which('prince', function (error, filename) {
-			if (error) error.message = 'prince(1) not found in PATH: ' + error.message;
-			if (error) return reject(error);
+		which('prince', function (err, filename) {
+			if (err) err.message = 'prince(1) not found in PATH: ' + err.message;
+			if (err) return reject(err);
 
-			child_process.execFile(filename, ['--version'], function (error, stdout, stderr) {
-				if (error) error.message = 'prince(1) failed on "--version": ' + error.message;
-				if (error) return reject(error);
+			child_process.execFile(filename, ['--version'], function (err, stdout, stderr) {
+				if (err) err.message = 'prince(1) failed on "--version": ' + err.message;
+				if (err) return reject(err);
 
 				var m = stdout.match(/^Prince\s+(\d+(?:\.\d+)?)/);
 				if (!(m !== null && typeof m[1] !== 'undefined')) {
@@ -81,9 +81,9 @@ var princeDownloadURL = function () {
 		else {
 
 			// todo: move away from `shtool` to https://nodejs.org/api/os.html
-			child_process.exec('sh "' + __dirname + '/shtool" platform -t binary', function (error, stdout /*, stderr */) {
-				if (error) error.message = 'ERROR: failed to determine platform details on platform "' + id + '": ' + error.message;
-				if (error) return reject(error);
+			child_process.exec('sh "' + __dirname + '/shtool" platform -t binary', function (err, stdout /*, stderr */) {
+				if (err) err.message = 'ERROR: failed to determine platform details on platform "' + id + '": ' + err.message;
+				if (err) return reject(err);
 				console.log('princexml stdout:', stdout);// dev
 				var platform = stdout.toString().replace(/^(\S+).*\n?$/, '$1');
 				console.log('princexml platform:', platform);// dev
@@ -134,8 +134,8 @@ var downloadData = function (url) {
 				console.log('-- using proxy ($http_proxy): ' + options.proxy);
 				resolve();
 			} else {
-				child_process.exec('npm config get proxy', function (error, stdout /*, stderr */) {
-					if (error === null) {
+				child_process.exec('npm config get proxy', function (err, stdout /*, stderr */) {
+					if (err === null) {
 						stdout = stdout.toString().replace(/\r?\n$/, '');
 						if (stdout.match(/^https?:\/\/.+/)) {
 							options.proxy = stdout;
@@ -147,9 +147,9 @@ var downloadData = function (url) {
 			}
 		})).then(function () {
 			console.log('-- download: ' + url);
-			var req = request(options, function (error, response, body) {
-				if (error) error.message = 'download failed: ' + error.message;
-				if (error) return reject(error);
+			var req = request(options, function (err, response, body) {
+				if (err) err.message = 'download failed: ' + err.message;
+				if (err) return reject(err);
 				if (response.statusCode !== 200) return reject(new Error('download failed with status: ' + response.statusCode));
 
 				console.log('-- download: ' + body.length + ' bytes received.');
@@ -180,8 +180,8 @@ var extractTarball = function (tarball, destdir, stripdirs) {
 		fs.createReadStream(tarball)
 			.pipe(zlib.createGunzip())
 			.pipe(tar.extract({cwd: destdir, strip: stripdirs}))
-			.on('error', function (error) {
-				reject(error);
+			.on('error', function (err) {
+				reject(err);
 			})
 			.on('close', function () {
 				console.log('Extracted tarball'); // dev
@@ -205,7 +205,7 @@ if (process.argv[2] === 'install') {
 	princeInfo().then(function (prince) {
 		console.log('-- found prince(1) command: ' + chalk.blue(prince.command));
 		console.log('-- found prince(1) version: ' + chalk.blue(prince.version));
-	}, function (/* error */) {
+	}, function (/* err */) {
 		console.log('++ no globally installed PrinceXML found');
 		console.log('++ downloading PrinceXML distribution');
 		princeDownloadURL().then(function (url) {
@@ -217,9 +217,9 @@ if (process.argv[2] === 'install') {
 					destfile = path.join(__dirname, 'prince.exe');
 					fs.writeFileSync(destfile, data, {encoding: null});
 					var args = ['/s', '/a', '/vTARGETDIR="' + path.resolve(destdir) + '" /qn'];
-					child_process.execFile(destfile, args, function (error, stdout, stderr) {
-						if (error !== null) {
-							console.log(chalk.red('** ERROR: failed to extract: ' + error));
+					child_process.execFile(destfile, args, function (err, stdout, stderr) {
+						if (err !== null) {
+							console.log(chalk.red('** ERROR: failed to extract: ' + err));
 							stdout = stdout.toString();
 							stderr = stderr.toString();
 							if (stdout !== '') console.log('** STDOUT: ' + stdout);
@@ -236,16 +236,16 @@ if (process.argv[2] === 'install') {
 					extractTarball(destfile, destdir, 1).then(function () {
 						fs.unlinkSync(destfile);
 						console.log('-- OK: local PrinceXML installation now available');
-					}, function (error) {
-						console.log(chalk.red('** ERROR: failed to extract: ' + error));
+					}, function (err) {
+						console.log(chalk.red('** ERROR: failed to extract: ' + err));
 					});
 				}
-			}, function (error) {
-				console.log(chalk.red('** ERROR: failed to download: ' + error));
+			}, function (err) {
+				console.log(chalk.red('** ERROR: failed to download: ' + err));
 				process.exit(1); // eslint-disable-line no-process-exit
 			});
-		}, function(error) {
-			console.log(chalk.red('** ERROR: failed to find download url: ' + error));
+		}, function(err) {
+			console.log(chalk.red('** ERROR: failed to find download url: ' + err));
 			process.exit(1); // eslint-disable-line no-process-exit
 		});
 	});
@@ -254,8 +254,8 @@ if (process.argv[2] === 'install') {
 	destdir = path.join(__dirname, 'prince');
 	if (fs.existsSync(destdir)) {
 		console.log('++ deleting locally unpacked PrinceXML distribution');
-		rimraf(destdir, function (error) {
-			if (error !== null) console.log(chalk.red('** ERROR: ' + error));
+		rimraf(destdir, function (err) {
+			if (err !== null) console.log(chalk.red('** ERROR: ' + err));
 			else console.log('-- OK: done');
 		});
 	}
