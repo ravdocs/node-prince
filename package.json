@@ -47,9 +47,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "install": "node ./prince-npm.js install",
     "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
-    "test": "node ./test/test.js",
-    "uninstall": "node ./prince-npm.js uninstall"
+    "test": "node ./test/test.js"
   }
 }
