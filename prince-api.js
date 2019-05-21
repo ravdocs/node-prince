@@ -32,16 +32,13 @@
  */
 'use strict';
 
-/*  core requirements  */
 var ChildProcess = require('child_process');
 var FS = require('fs');
 var Path = require('path');
-
-/*  extra requirements  */
 var Promise = require('promise');
 var forOwn = require('lodash.forown');
 
-/*  the officially support options of prince(1)  */
+// the officially support options of prince(1)
 var princeOptions = {
 	'help': false,
 	'version': false,
@@ -90,12 +87,12 @@ var princeOptions = {
 	'scanfonts': false
 };
 
-/*  API constructor  */
+// API constructor
 function Prince (options) {
-	/*  optionally on-the-fly generate an instance  */
+	// optionally on-the-fly generate an instance
 	if (!(this instanceof Prince)) return new Prince(options);
 
-	/*  create default configuration  */
+	// create default configuration
 	this.config = {
 		binary: 'prince',
 		prefix: '',
@@ -109,7 +106,7 @@ function Prince (options) {
 		output: ''
 	};
 
-	/*  override defaults with more reasonable information about environment  */
+	// override defaults with more reasonable information about environment
 	var install = [
 		{basedir: 'prince/lib/prince', binary: 'bin/prince'},
 		{basedir: 'prince\\program files\\Prince\\Engine', binary: 'bin\\prince.exe'}
@@ -124,7 +121,7 @@ function Prince (options) {
 		this.prefix(basedir);
 	});
 
-	/*  allow caller to override defaults  */
+	// allow caller to override defaults
 	if (typeof options === 'object') {
 		if (typeof options.binary !== 'undefined') this.binary(options.binary);
 		if (typeof options.prefix !== 'undefined') this.prefix(options.prefix);
@@ -136,7 +133,7 @@ function Prince (options) {
 	return this;
 }
 
-/*  set path to CLI binary  */
+// set path to CLI binary
 Prince.prototype.binary = function (binary) {
 	if (arguments.length !== 1) throw new Error('Prince#binary: invalid number of arguments');
 	this.config.binary = binary;
@@ -145,63 +142,63 @@ Prince.prototype.binary = function (binary) {
 	return this;
 };
 
-/*  set path to installation tree  */
+// set path to installation tree
 Prince.prototype.prefix = function (prefix) {
 	if (arguments.length !== 1) throw new Error('Prince#prefix: invalid number of arguments');
 	this.config.prefix = prefix;
 	return this;
 };
 
-/*  set path to license file  */
+// set path to license file
 Prince.prototype.license = function (filename) {
 	if (arguments.length !== 1) throw new Error('Prince#license: invalid number of arguments');
 	this.config.license = filename;
 	return this;
 };
 
-/*  set timeout for CLI execution  */
+// set timeout for CLI execution
 Prince.prototype.timeout = function (timeout) {
 	if (arguments.length !== 1) throw new Error('Prince#timeout: invalid number of arguments');
 	this.config.timeout = timeout;
 	return this;
 };
 
-/*  set maxmimum stdout/stderr buffer for CLI execution  */
+// set maxmimum stdout/stderr buffer for CLI execution
 Prince.prototype.maxbuffer = function (maxbuffer) {
 	if (arguments.length !== 1) throw new Error('Prince#maxbuffer: invalid number of arguments');
 	this.config.maxbuffer = maxbuffer;
 	return this;
 };
 
-/*  set current working directory for CLI execution  */
+// set current working directory for CLI execution
 Prince.prototype.cwd = function (cwd) {
 	if (arguments.length !== 1) throw new Error('Prince#cwd: invalid number of arguments');
 	this.config.cwd = cwd;
 	return this;
 };
 
-/*  set input file(s)  */
+// set input file(s)
 Prince.prototype.inputs = function (inputs) {
 	if (arguments.length !== 1) throw new Error('Prince#inputs: invalid number of arguments');
 	this.config.inputs = Array.isArray(inputs) ? inputs : [inputs];
 	return this;
 };
 
-/*  set cookie(s)  */
+// set cookie(s)
 Prince.prototype.cookies = function (cookies) {
 	if (arguments.length !== 1) throw new Error('Prince#cookies: invalid number of arguments');
 	this.config.cookies = Array.isArray(cookies) ? cookies : [cookies];
 	return this;
 };
 
-/*  set output file  */
+// set output file
 Prince.prototype.output = function (output) {
 	if (arguments.length !== 1) throw new Error('Prince#output: invalid number of arguments');
 	this.config.output = output;
 	return this;
 };
 
-/*  set CLI options  */
+// set CLI options
 Prince.prototype.option = function (name, value, forced) {
 	if (arguments.length < 1 || arguments.length > 3) throw new Error('Prince#option: invalid number of arguments');
 	if (arguments.length < 2) value = true;
@@ -212,9 +209,9 @@ Prince.prototype.option = function (name, value, forced) {
 	return this;
 };
 
-/*  execute the CLI binary  */
+// execute the CLI binary
 Prince.prototype._execute = function (method, args) {
-	/*  determine path to prince(1) binary  */
+	// determine path to prince(1) binary
 	var prog = this.config.binary;
 	if (!FS.existsSync(prog)) {
 		var findInPath = function (name) {
@@ -229,7 +226,7 @@ Prince.prototype._execute = function (method, args) {
                 this.config.binary + '" to a filesystem path');
 	}
 
-	/*  return promise for executing CLI  */
+	// return promise for executing CLI
 	var self = this;
 	return new Promise(function (resolve, reject) {
 		try {
@@ -265,9 +262,9 @@ Prince.prototype._execute = function (method, args) {
 	});
 };
 
-/*  execute the CLI binary  */
+// execute the CLI binary
 Prince.prototype.execute = function () {
-	/*  determine arguments to prince(1) binary  */
+	// determine arguments to prince(1) binary
 	var args = [];
 	if (this.config.prefix !== '') {
 		args.push('--prefix');
@@ -285,19 +282,19 @@ Prince.prototype.execute = function () {
 		args.push(input);
 	});
 
-	/*  supported since Prince 10  */
+	// supported since Prince 10
 	this.config.cookies.forEach(function (cookie) {
 		args.push('--cookie');
 		args.push(cookie);
 	});
 
-	/*  required from Prince 11 on, supported since Prince 7  */
+	// required from Prince 11 on, supported since Prince 7
 	args.push('--output');
 	args.push(this.config.output);
 
-	/*  return promise for executing CLI  */
+	// return promise for executing CLI
 	return this._execute('execute', args);
 };
 
-/*  export API constructor  */
+// export API constructor
 module.exports = Prince;
