@@ -1,43 +1,43 @@
 {
   "name": "@ravdocs/princexml",
-  "homepage": "https://github.com/ravdocs/princexml",
-  "description": "Node API for executing XML/HTML to PDF renderer PrinceXML via prince(1) CLI",
   "version": "1.5.4",
-  "license": "MIT",
-  "publishConfig": {
-    "scope": "ravdocs"
-  },
-  "author": "Ralf S. Engelschall <rse@engelschall.com> (http://engelschall.com)",
+  "description": "Node API for executing XML/HTML to PDF renderer PrinceXML via prince(1) CLI",
   "keywords": [
-    "Prince",
-    "PrinceXML",
+    "API",
     "CLI",
-    "XML",
     "HTML",
     "PDF",
-    "renderer",
-    "API"
+    "Prince",
+    "PrinceXML",
+    "XML",
+    "renderer"
   ],
+  "homepage": "https://github.com/ravdocs/princexml",
+  "bugs": {
+    "url": "https://github.com/ravdocs/princexml"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/rse/node-prince.git"
   },
-  "bugs": {
-    "url": "https://github.com/ravdocs/princexml"
-  },
+  "license": "MIT",
+  "author": "Ralf S. Engelschall <rse@engelschall.com> (http://engelschall.com)",
   "main": "./prince-api.js",
-  "devDependencies": {
-    "@ravdocs/eslint": "^1.0.7"
+  "scripts": {
+    "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
+    "test": "node ./test/test.js"
   },
   "dependencies": {
     "lodash.forown": "^4.4.0",
     "promise": "8.0.1"
   },
+  "devDependencies": {
+    "@ravdocs/eslint": "^1.0.7"
+  },
   "engines": {
     "node": ">=4.0.0"
   },
-  "scripts": {
-    "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
-    "test": "node ./test/test.js"
+  "publishConfig": {
+    "scope": "ravdocs"
   }
 }
