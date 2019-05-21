@@ -114,17 +114,15 @@ function Prince (options) {
 		{basedir: 'prince/lib/prince', binary: 'bin/prince'},
 		{basedir: 'prince\\program files\\Prince\\Engine', binary: 'bin\\prince.exe'}
 	];
-	var basedir;
-	var binary;
-	for (var i = 0; i < install.length; i++) {
-		basedir = Path.resolve(Path.join(__dirname, install[i].basedir));
-		binary = Path.join(basedir, install[i].binary);
-		if (FS.existsSync(binary)) {
-			this.binary(binary);
-			this.prefix(basedir);
-			break;
-		}
-	}
+	install.forEach(function(possible) {
+		var basedir = Path.resolve(Path.join(__dirname, possible.basedir));
+		var binary = Path.join(basedir, possible.binary);
+
+		if (!FS.accessSync(binary, FS.constants.F_OK)) return;
+
+		this.binary(binary);
+		this.prefix(basedir);
+	});
 
 	/*  allow caller to override defaults  */
 	if (typeof options === 'object') {
