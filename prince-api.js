@@ -34,9 +34,9 @@
 
 /*  core requirements  */
 var child_process = require('child_process');
-var fs = require('fs');
-var path = require('path');
-var util = require('util');
+var FS = require('fs');
+var Path = require('path');
+var Util = require('util');
 
 /*  extra requirements  */
 var Promise = require('promise');
@@ -118,9 +118,9 @@ function Prince (options) {
 	var basedir;
 	var binary;
 	for (var i = 0; i < install.length; i++) {
-		basedir = path.resolve(path.join(__dirname, install[i].basedir));
-		binary = path.join(basedir, install[i].binary);
-		if (fs.existsSync(binary)) {
+		basedir = Path.resolve(Path.join(__dirname, install[i].basedir));
+		binary = Path.join(basedir, install[i].binary);
+		if (FS.existsSync(binary)) {
 			this.binary(binary);
 			this.prefix(basedir);
 			break;
@@ -186,14 +186,14 @@ Prince.prototype.cwd = function (cwd) {
 /*  set input file(s)  */
 Prince.prototype.inputs = function (inputs) {
 	if (arguments.length !== 1) throw new Error('Prince#inputs: invalid number of arguments');
-	this.config.inputs = util.isArray(inputs) ? inputs : [inputs];
+	this.config.inputs = Util.isArray(inputs) ? inputs : [inputs];
 	return this;
 };
 
 /*  set cookie(s)  */
 Prince.prototype.cookies = function (cookies) {
 	if (arguments.length !== 1) throw new Error('Prince#cookies: invalid number of arguments');
-	this.config.cookies = util.isArray(cookies) ? cookies : [cookies];
+	this.config.cookies = Util.isArray(cookies) ? cookies : [cookies];
 	return this;
 };
 
@@ -219,12 +219,12 @@ Prince.prototype.option = function (name, value, forced) {
 Prince.prototype._execute = function (method, args) {
 	/*  determine path to prince(1) binary  */
 	var prog = this.config.binary;
-	if (!fs.existsSync(prog)) {
+	if (!FS.existsSync(prog)) {
 		var findInPath = function (name) {
-			var p = process.env.PATH.split(path.delimiter).map(function(item) {
-				return path.join(item, name);
+			var p = process.env.PATH.split(Path.delimiter).map(function(item) {
+				return Path.join(item, name);
 			});
-			for (var i = 0, len = p.length; i < len; i++) if (fs.existsSync(p[i])) return p[i];
+			for (var i = 0, len = p.length; i < len; i++) if (FS.existsSync(p[i])) return p[i];
 			return undefined;
 		};
 		prog = findInPath(prog);
