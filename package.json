@@ -27,9 +27,7 @@
   },
   "main": "./prince-api.js",
   "devDependencies": {
-    "@ravdocs/eslint": "^1.0.7",
-    "grunt": "^1.0.4",
-    "grunt-contrib-jshint": "^2.1.0"
+    "@ravdocs/eslint": "^1.0.7"
   },
   "dependencies": {
     "lodash.forown": "^4.4.0",
