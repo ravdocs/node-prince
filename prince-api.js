@@ -36,7 +36,6 @@
 var child_process = require('child_process');
 var FS = require('fs');
 var Path = require('path');
-var Util = require('util');
 
 /*  extra requirements  */
 var Promise = require('promise');
@@ -186,14 +185,14 @@ Prince.prototype.cwd = function (cwd) {
 /*  set input file(s)  */
 Prince.prototype.inputs = function (inputs) {
 	if (arguments.length !== 1) throw new Error('Prince#inputs: invalid number of arguments');
-	this.config.inputs = Util.isArray(inputs) ? inputs : [inputs];
+	this.config.inputs = Array.isArray(inputs) ? inputs : [inputs];
 	return this;
 };
 
 /*  set cookie(s)  */
 Prince.prototype.cookies = function (cookies) {
 	if (arguments.length !== 1) throw new Error('Prince#cookies: invalid number of arguments');
-	this.config.cookies = Util.isArray(cookies) ? cookies : [cookies];
+	this.config.cookies = Array.isArray(cookies) ? cookies : [cookies];
 	return this;
 };
 
