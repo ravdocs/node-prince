@@ -33,7 +33,7 @@
 'use strict';
 
 /*  core requirements  */
-var child_process = require('child_process');
+var ChildProcess = require('child_process');
 var FS = require('fs');
 var Path = require('path');
 
@@ -240,7 +240,7 @@ Prince.prototype._execute = function (method, args) {
 			options.maxBuffer = self.config.maxbuffer;
 			options.cwd = self.config.cwd;
 			options.encoding = 'buffer';
-			child_process.execFile(prog, args, options,
+			ChildProcess.execFile(prog, args, options,
 				function (err, stdout, stderr) {
 					if (err) {
 						err.stdout = stdout;
