@@ -4,7 +4,7 @@
 **
 **  Permission is hereby granted, free of charge, to any person obtaining
 **  a copy of this software and associated documentation files (the
-**  "Software"), to deal in the Software without restriction, including
+**  'Software'), to deal in the Software without restriction, including
 **  without limitation the rights to use, copy, modify, merge, publish,
 **  distribute, sublicense, and/or sell copies of the Software, and to
 **  permit persons to whom the Software is furnished to do so, subject to
@@ -13,7 +13,7 @@
 **  The above copyright notice and this permission notice shall be included
 **  in all copies or substantial portions of the Software.
 **
-**  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+**  THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
 **  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 **  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 **  IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
@@ -21,21 +21,21 @@
 **  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 **  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
+'use strict';
 
-var util   = require("util");
-var Prince = require("./prince-api.js");
+var util = require('util');
+var Prince = require('../prince-api.js');
 
 Prince()
 	.option('version')
-    .execute()
-    .then(function (results) {
+	.execute()
+	.then(function (results) {
 		var stdout = results.stdout.toString();
-		var lines = stdout.split(/\r{0,1}\n/).filter(function(line){
+		var lines = stdout.split(/\r{0,1}\n/).filter(function(line) {
 			return !!line;
 		});
 		// console.log(stdout);
 		console.log(lines);
-    }, function (error) {
-        console.log("ERROR: ", util.inspect(error));
-    })
-
+	}, function (error) {
+		console.log('ERROR: ', util.inspect(error));
+	});
