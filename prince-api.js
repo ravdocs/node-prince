@@ -195,31 +195,33 @@ Prince.prototype._execute = function(method, args) {
 	// return promise for executing CLI
 	var self = this;
 	return new Promise(function(resolve, reject) {
+
 		var binary = self.config.binary;
-		var options = {};
-		options.timeout = self.config.timeout;
-		options.maxBuffer = self.config.maxbuffer;
-		options.cwd = self.config.cwd;
-		options.encoding = 'buffer';
-		ChildProcess.execFile(binary, args, options,
-			function(err, stdout, stderr) {
-				if (err) {
-					err.stdout = stdout;
-					err.stderr = stderr;
-					return reject(err);
-				}
+		var options = {
+			timeout: self.config.timeout,
+			maxBuffer: self.config.maxbuffer,
+			cwd: self.config.cwd,
+			encoding: 'buffer'
+		};
 
-				var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
+		ChildProcess.execFile(binary, args, options, function(err, stdout, stderr) {
+			if (err) {
+				err.stdout = stdout;
+				err.stderr = stderr;
+				return reject(err);
+			}
 
-				if (m) {
-					err = new Error(m[1]);
-					err.stdout = stdout;
-					err.stderr = stderr;
-					return reject(err);
-				}
+			var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
 
-				resolve({stdout: stdout, stderr: stderr});
-			});
+			if (m) {
+				err = new Error(m[1]);
+				err.stdout = stdout;
+				err.stderr = stderr;
+				return reject(err);
+			}
+
+			resolve({stdout: stdout, stderr: stderr});
+		});
 	});
 };
 
