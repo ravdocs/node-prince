@@ -32,6 +32,8 @@ var Promise = require('promise');
 var ForOwn = require('lodash.forown');
 var Which = require('which');
 
+var BINARY = 'prince';
+
 // the officially support options of prince(1)
 var PRINCE_OPTIONS = {
 	'help': false,
@@ -88,7 +90,6 @@ function Prince (options) {
 
 	// create default configuration
 	this.config = {
-		binary: 'prince',
 		license: '',
 		timeout: 10 * 1000,
 		maxbuffer: 10 * 1024 * 1024,
@@ -101,7 +102,6 @@ function Prince (options) {
 
 	// allow caller to override defaults
 	if (typeof options === 'object') {
-		if (typeof options.binary !== 'undefined') this.binary(options.binary);
 		if (typeof options.inputs !== 'undefined') this.inputs(options.inputs);
 		if (typeof options.cookies !== 'undefined') this.cookies(options.cookies);
 		if (typeof options.output !== 'undefined') this.output(options.output);
@@ -109,15 +109,6 @@ function Prince (options) {
 
 	return this;
 }
-
-// set path to CLI binary
-Prince.prototype.binary = function(binary) {
-	if (arguments.length !== 1) throw new Error('Prince#binary: invalid number of arguments');
-
-	this.config.binary = binary;
-
-	return this;
-};
 
 // set path to license file
 Prince.prototype.license = function(filename) {
@@ -186,7 +177,6 @@ Prince.prototype._execute = function(args) {
 	var self = this;
 	return new Promise(function(resolve, reject) {
 
-		var binary = self.config.binary;
 		var options = {
 			timeout: self.config.timeout,
 			maxBuffer: self.config.maxbuffer,
@@ -194,7 +184,7 @@ Prince.prototype._execute = function(args) {
 			encoding: 'buffer'
 		};
 
-		ChildProcess.execFile(binary, args, options, function(err, stdout, stderr) {
+		ChildProcess.execFile(BINARY, args, options, function(err, stdout, stderr) {
 			if (err) {
 				err.stdout = stdout;
 				err.stderr = stderr;
@@ -217,14 +207,12 @@ Prince.prototype._execute = function(args) {
 
 Prince.prototype._verifyInstalled = function() {
 
-	var self = this;
+	// var self = this;
 
 	return new Promise(function(resolve, reject) {
 
-		var binary = self.config.binary;
-
-		Which(binary, function(err) {
-			if (err) return reject(new Error(`Prince#_verifyInstalled: cannot find "${binary}" binary. Verify that "${binary}" is installed and is in the PATH.`));
+		Which(BINARY, function(err) {
+			if (err) return reject(new Error(`Prince#_verifyInstalled: cannot find "${BINARY}" binary. Verify that "${BINARY}" is installed and is in the PATH.`));
 
 			resolve();
 		});
