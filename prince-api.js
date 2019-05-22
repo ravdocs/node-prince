@@ -89,7 +89,6 @@ function Prince (options) {
 	// create default configuration
 	this.config = {
 		binary: 'prince',
-		prefix: '',
 		license: '',
 		timeout: 10 * 1000,
 		maxbuffer: 10 * 1024 * 1024,
@@ -103,7 +102,6 @@ function Prince (options) {
 	// allow caller to override defaults
 	if (typeof options === 'object') {
 		if (typeof options.binary !== 'undefined') this.binary(options.binary);
-		if (typeof options.prefix !== 'undefined') this.prefix(options.prefix);
 		if (typeof options.inputs !== 'undefined') this.inputs(options.inputs);
 		if (typeof options.cookies !== 'undefined') this.cookies(options.cookies);
 		if (typeof options.output !== 'undefined') this.output(options.output);
@@ -117,15 +115,7 @@ Prince.prototype.binary = function(binary) {
 	if (arguments.length !== 1) throw new Error('Prince#binary: invalid number of arguments');
 
 	this.config.binary = binary;
-	this.config.prefix = '';
 
-	return this;
-};
-
-// set path to installation tree
-Prince.prototype.prefix = function(prefix) {
-	if (arguments.length !== 1) throw new Error('Prince#prefix: invalid number of arguments');
-	this.config.prefix = prefix;
 	return this;
 };
 
@@ -245,10 +235,6 @@ Prince.prototype._verifyInstalled = function() {
 Prince.prototype.execute = function() {
 	// determine arguments to prince(1) binary
 	var args = [];
-	if (this.config.prefix !== '') {
-		args.push('--prefix');
-		args.push(this.config.prefix);
-	}
 	if (this.config.license !== '') {
 		args.push('--license-file');
 		args.push(this.config.license);
