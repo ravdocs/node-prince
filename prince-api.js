@@ -114,7 +114,7 @@ function Prince (options) {
 }
 
 // set path to CLI binary
-Prince.prototype.binary = function (binary) {
+Prince.prototype.binary = function(binary) {
 	if (arguments.length !== 1) throw new Error('Prince#binary: invalid number of arguments');
 	this.config.binary = binary;
 	this.config.prefix = '';
@@ -123,63 +123,63 @@ Prince.prototype.binary = function (binary) {
 };
 
 // set path to installation tree
-Prince.prototype.prefix = function (prefix) {
+Prince.prototype.prefix = function(prefix) {
 	if (arguments.length !== 1) throw new Error('Prince#prefix: invalid number of arguments');
 	this.config.prefix = prefix;
 	return this;
 };
 
 // set path to license file
-Prince.prototype.license = function (filename) {
+Prince.prototype.license = function(filename) {
 	if (arguments.length !== 1) throw new Error('Prince#license: invalid number of arguments');
 	this.config.license = filename;
 	return this;
 };
 
 // set timeout for CLI execution
-Prince.prototype.timeout = function (timeout) {
+Prince.prototype.timeout = function(timeout) {
 	if (arguments.length !== 1) throw new Error('Prince#timeout: invalid number of arguments');
 	this.config.timeout = timeout;
 	return this;
 };
 
 // set maxmimum stdout/stderr buffer for CLI execution
-Prince.prototype.maxbuffer = function (maxbuffer) {
+Prince.prototype.maxbuffer = function(maxbuffer) {
 	if (arguments.length !== 1) throw new Error('Prince#maxbuffer: invalid number of arguments');
 	this.config.maxbuffer = maxbuffer;
 	return this;
 };
 
 // set current working directory for CLI execution
-Prince.prototype.cwd = function (cwd) {
+Prince.prototype.cwd = function(cwd) {
 	if (arguments.length !== 1) throw new Error('Prince#cwd: invalid number of arguments');
 	this.config.cwd = cwd;
 	return this;
 };
 
 // set input file(s)
-Prince.prototype.inputs = function (inputs) {
+Prince.prototype.inputs = function(inputs) {
 	if (arguments.length !== 1) throw new Error('Prince#inputs: invalid number of arguments');
 	this.config.inputs = Array.isArray(inputs) ? inputs : [inputs];
 	return this;
 };
 
 // set cookie(s)
-Prince.prototype.cookies = function (cookies) {
+Prince.prototype.cookies = function(cookies) {
 	if (arguments.length !== 1) throw new Error('Prince#cookies: invalid number of arguments');
 	this.config.cookies = Array.isArray(cookies) ? cookies : [cookies];
 	return this;
 };
 
 // set output file
-Prince.prototype.output = function (output) {
+Prince.prototype.output = function(output) {
 	if (arguments.length !== 1) throw new Error('Prince#output: invalid number of arguments');
 	this.config.output = output;
 	return this;
 };
 
 // set CLI options
-Prince.prototype.option = function (name, value, forced) {
+Prince.prototype.option = function(name, value, forced) {
 	if (arguments.length < 1 || arguments.length > 3) throw new Error('Prince#option: invalid number of arguments');
 	if (arguments.length < 2) value = true;
 	if (arguments.length < 3) forced = false;
@@ -190,11 +190,11 @@ Prince.prototype.option = function (name, value, forced) {
 };
 
 // execute the CLI binary
-Prince.prototype._execute = function (method, args) {
+Prince.prototype._execute = function(method, args) {
 	// determine path to prince(1) binary
 	var prog = this.config.binary;
 	if (!FS.existsSync(prog)) {
-		var findInPath = function (name) {
+		var findInPath = function(name) {
 			var p = process.env.PATH.split(Path.delimiter).map(function(item) {
 				return Path.join(item, name);
 			});
@@ -208,7 +208,7 @@ Prince.prototype._execute = function (method, args) {
 
 	// return promise for executing CLI
 	var self = this;
-	return new Promise(function (resolve, reject) {
+	return new Promise(function(resolve, reject) {
 		try {
 			var options = {};
 			options.timeout = self.config.timeout;
@@ -216,7 +216,7 @@ Prince.prototype._execute = function (method, args) {
 			options.cwd = self.config.cwd;
 			options.encoding = 'buffer';
 			ChildProcess.execFile(prog, args, options,
-				function (err, stdout, stderr) {
+				function(err, stdout, stderr) {
 					if (err) {
 						err.stdout = stdout;
 						err.stderr = stderr;
@@ -243,7 +243,7 @@ Prince.prototype._execute = function (method, args) {
 };
 
 // execute the CLI binary
-Prince.prototype.execute = function () {
+Prince.prototype.execute = function() {
 	// determine arguments to prince(1) binary
 	var args = [];
 	if (this.config.prefix !== '') {
@@ -254,16 +254,16 @@ Prince.prototype.execute = function () {
 		args.push('--license-file');
 		args.push(this.config.license);
 	}
-	ForOwn(this.config.option, function (value, name) {
+	ForOwn(this.config.option, function(value, name) {
 		args.push('--' + name);
 		if (value !== true) args.push(value);
 	});
-	this.config.inputs.forEach(function (input) {
+	this.config.inputs.forEach(function(input) {
 		args.push(input);
 	});
 
 	// supported since Prince 10
-	this.config.cookies.forEach(function (cookie) {
+	this.config.cookies.forEach(function(cookie) {
 		args.push('--cookie');
 		args.push(cookie);
 	});
