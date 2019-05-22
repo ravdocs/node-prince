@@ -31,10 +31,10 @@ var ChildProcess = require('child_process');
 var FS = require('fs');
 var Path = require('path');
 var Promise = require('promise');
-var forOwn = require('lodash.forown');
+var ForOwn = require('lodash.forown');
 
 // the officially support options of prince(1)
-var princeOptions = {
+var PRINCE_OPTIONS = {
 	'help': false,
 	'version': false,
 	'credits': false,
@@ -198,8 +198,8 @@ Prince.prototype.option = function (name, value, forced) {
 	if (arguments.length < 1 || arguments.length > 3) throw new Error('Prince#option: invalid number of arguments');
 	if (arguments.length < 2) value = true;
 	if (arguments.length < 3) forced = false;
-	if (!forced && typeof princeOptions[name] === 'undefined') throw new Error('Prince#option: invalid prince(1) option: "' + name + '" (but can be forced)');
-	if (!forced && princeOptions[name] === true && arguments.length === 1) throw new Error('Prince#option: prince(1) option "' + name + '" required argument');
+	if (!forced && typeof PRINCE_OPTIONS[name] === 'undefined') throw new Error('Prince#option: invalid prince(1) option: "' + name + '" (but can be forced)');
+	if (!forced && PRINCE_OPTIONS[name] === true && arguments.length === 1) throw new Error('Prince#option: prince(1) option "' + name + '" required argument');
 	this.config.option[name] = value;
 	return this;
 };
@@ -269,7 +269,7 @@ Prince.prototype.execute = function () {
 		args.push('--license-file');
 		args.push(this.config.license);
 	}
-	forOwn(this.config.option, function (value, name) {
+	ForOwn(this.config.option, function (value, name) {
 		args.push('--' + name);
 		if (value !== true) args.push(value);
 	});
