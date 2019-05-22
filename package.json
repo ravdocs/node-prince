@@ -22,6 +22,9 @@
   },
   "license": "MIT",
   "author": "Ralf S. Engelschall <rse@engelschall.com> (http://engelschall.com)",
+  "files": [
+    "prince-api.js"
+  ],
   "main": "./prince-api.js",
   "scripts": {
     "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
