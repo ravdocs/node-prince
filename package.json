@@ -26,6 +26,10 @@
     "prince-api.js"
   ],
   "main": "./prince-api.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
   "scripts": {
     "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
     "test": "node ./test/test.js"
