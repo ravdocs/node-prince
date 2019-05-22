@@ -35,7 +35,8 @@
     "promise": "8.0.1"
   },
   "devDependencies": {
-    "@ravdocs/eslint": "^1.0.7"
+    "@ravdocs/eslint": "^1.0.7",
+    "eslint": "^5.16.0"
   },
   "engines": {
     "node": ">=4.0.0"
