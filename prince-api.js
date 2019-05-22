@@ -190,7 +190,7 @@ Prince.prototype.option = function(name, value, forced) {
 };
 
 // execute the CLI binary
-Prince.prototype._execute = function(method, args) {
+Prince.prototype._execute = function(args) {
 
 	// return promise for executing CLI
 	var self = this;
@@ -272,11 +272,10 @@ Prince.prototype.execute = function() {
 	args.push(this.config.output);
 
 	// return promise for executing CLI
-	// return this._execute('execute', args);
 	var self = this;
 	return self._verifyInstalled()
 		.then(function() {
-			return self._execute('execute', args);
+			return self._execute(args);
 		})
 		.catch(function(err) {
 			if (!err.stdout) err.stdout = '';
