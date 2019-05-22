@@ -28,10 +28,9 @@
 'use strict';
 
 var ChildProcess = require('child_process');
-var FS = require('fs');
-var Path = require('path');
 var Promise = require('promise');
 var ForOwn = require('lodash.forown');
+var Which = require('which');
 
 // the officially support options of prince(1)
 var PRINCE_OPTIONS = {
@@ -116,6 +115,7 @@ function Prince (options) {
 // set path to CLI binary
 Prince.prototype.binary = function(binary) {
 	if (arguments.length !== 1) throw new Error('Prince#binary: invalid number of arguments');
+
 	this.config.binary = binary;
 	this.config.prefix = '';
 
@@ -191,31 +191,18 @@ Prince.prototype.option = function(name, value, forced) {
 
 // execute the CLI binary
 Prince.prototype._execute = function(method, args) {
-	// determine path to prince(1) binary
-	var prog = this.config.binary;
-	if (!FS.existsSync(prog)) {
-		var findInPath = function(name) {
-			var p = process.env.PATH.split(Path.delimiter).map(function(item) {
-				return Path.join(item, name);
-			});
-			for (var i = 0, len = p.length; i < len; i++) if (FS.existsSync(p[i])) return p[i];
-			return undefined;
-		};
-		prog = findInPath(prog);
-		if (typeof prog === 'undefined') throw new Error('Prince#' + method + ': cannot resolve binary "' +
-                this.config.binary + '" to a filesystem path');
-	}
 
 	// return promise for executing CLI
 	var self = this;
 	return new Promise(function(resolve, reject) {
 		try {
+			var binary = self.config.binary;
 			var options = {};
 			options.timeout = self.config.timeout;
 			options.maxBuffer = self.config.maxbuffer;
 			options.cwd = self.config.cwd;
 			options.encoding = 'buffer';
-			ChildProcess.execFile(prog, args, options,
+			ChildProcess.execFile(binary, args, options,
 				function(err, stdout, stderr) {
 					if (err) {
 						err.stdout = stdout;
@@ -239,6 +226,22 @@ Prince.prototype._execute = function(method, args) {
 			err.stderr = '';
 			reject(err);
 		}
+	});
+};
+
+Prince.prototype._verifyInstalled = function() {
+
+	var self = this;
+
+	return new Promise(function(resolve, reject) {
+
+		var binary = self.config.binary;
+
+		Which(binary, function(err) {
+			if (err) return reject(new Error(`Prince#_verifyInstalled: cannot find "${binary}" binary. Verify that "${binary}" is installed and is in the PATH.`));
+
+			resolve();
+		});
 	});
 };
 
@@ -273,7 +276,17 @@ Prince.prototype.execute = function() {
 	args.push(this.config.output);
 
 	// return promise for executing CLI
-	return this._execute('execute', args);
+	// return this._execute('execute', args);
+	var self = this;
+	return self._verifyInstalled()
+		.then(function() {
+			return self._execute('execute', args);
+		})
+		.catch(function(err) {
+			if (!err.stdout) err.stdout = '';
+			if (!err.stderr) err.stderr = '';
+			throw err;
+		});
 };
 
 // export API constructor
