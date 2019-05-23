@@ -88,11 +88,18 @@ function Prince (options) {
 	// optionally on-the-fly generate an instance
 	if (!(this instanceof Prince)) return new Prince(options);
 
+	var MILLISECOND = 1;
+	var SECOND = 1000 * MILLISECOND;
+
+	var BYTE = 1;
+	var KIBIBYTE = 1024 * BYTE;
+	var MEBIBYTE = 1024 * KIBIBYTE;
+
 	// create default configuration
 	this.config = {
 		license: '',
-		timeout: 10 * 1000,
-		maxbuffer: 10 * 1024 * 1024,
+		timeout: 10 * SECOND,
+		maxbuffer: 10 * MEBIBYTE,
 		cwd: '.',
 		option: {},
 		inputs: [],
