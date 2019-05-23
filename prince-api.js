@@ -118,7 +118,11 @@ var PRINCE_OPTIONS = {
 	'raster-background': true,
 	'raster-threads': true,
 	'scanfonts': false,
-	'control': false
+	'control': false,
+
+	// undocumented options
+	'prefix': true,
+	'license-file': true
 };
 
 // API constructor
