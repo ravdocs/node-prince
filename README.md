@@ -35,14 +35,14 @@ var Prince = require('@ravdocs/princexml');
 var util = require('utils');
 
 Prince()
-    .inputs("test.html")
-    .output("test.pdf")
-    .execute()
-    .then(function () {
-        console.log("OK: done");
-    }, function (error) {
-        console.log("ERROR: ", util.inspect(error));
-    })
+	.inputs("test.html")
+	.output("test.pdf")
+	.execute()
+	.then(function () {
+		console.log("OK: done");
+	}, function (error) {
+		console.log("ERROR: ", util.inspect(error));
+	})
 ```
 
 # API
