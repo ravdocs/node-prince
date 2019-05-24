@@ -1,56 +1,34 @@
 
-PrinceXML
-===========
+# PrinceXML
 
-[Node](http://nodejs.org/) API for executing the XML/HTML to PDF renderer
-[PrinceXML](http://www.princexml.com/) via `prince` CLI.
+[Node](http://nodejs.org/) API for executing the XML/HTML to PDF renderer [PrinceXML](http://www.princexml.com/) via `prince` CLI.
 
-<p/>
-<img src="https://nodei.co/npm/prince.png?downloads=true&stars=true" alt=""/>
+# Overview
 
-<p/>
-<img src="https://david-dm.org/rse/node-prince.png" alt=""/>
+This is a [Node](http://nodejs.org/) API for executing the XML/HTML to PDF renderer [PrinceXML](http://www.princexml.com/) CLI `prince` from within JavaScript.
 
-Abstract
---------
+# Prerequisites
 
-This is a [Node](http://nodejs.org/) API for executing the
-XML/HTML to PDF renderer [PrinceXML](http://www.princexml.com/) CLI `prince` from within
-JavaScript. The essential point of this Node extension is not primarily
-to just abstract away the asynchronous CLI execution. Instead there
-are two other major points: First, this Node extension provides a
-fixed dependency, as other Node extensions which require PrinceXML can
-just depend (via their NPM `package.json` file) onto this extension.
-Second, as this Node extension can &mdash; across platforms &mdash;
-automatically download, locally unpack and use a PrinceXML distribution,
-there is no need for any previously available global PrinceXML
-installation. Just depend on this Node extension and PrinceXML is
-available!
+PrinceXML must already be [installed](https://www.princexml.com/download/), and the `prince` binary must be able to be run from the CLI.
 
-Installation
-------------
+To check whether the `prince` binary can be run, open up the CLI (Terminal/Powershell) and run:
 
-Use the Node Package Manager (NPM) to install this module
-locally (default) or globally (with option `-g`):
+```bash
+prince --version
+```
 
-    $ npm install [-g] prince
+If the command did not execute successfully, verify that the `prince` binary can be found in the PATH. The `prince` binary is most likely under this directory:
 
-ATTENTION: In case you are behind a corporate firewall, you usually
-have to configure your corporate proxy before installing this module.
-For this, either configure the proxy inside NPM (e.g. `npm config set proxy http://proxy.example.com:3128`)
-or alternatively set the environment variable `http_proxy` (e.g. `export http_proxy=http://proxy.example.com:3128`).
+- **Windows**: `C:\Program Files (x86)\Prince\engine\bin`
+- **Linux/MacOS**: `/usr/local/bin`
 
-NOTICE: PrinceXML provides just distribution-specific and dynamically
-linked Linux binaries. The Node-Prince installation procedure tries to
-detect your particular distribution on `npm install [-g] prince` and
-downloads the corresponding binary. But because of the dynamic linking
-of PrinceXML binaries, it still can be that you first have to install
-some distribution-specific system dependencies. For instance, under
-Debian 8.0 you first have to install the necessary system packages with
-`apt-get install nodejs nodejs-legacy npm libgif4 curl`.
+# Install
 
-Usage
------
+```bash
+npm install @ravdocs/princexml
+```
+
+# Usage
 
 ```js
 var Prince = require('@ravdocs/princexml');
@@ -67,8 +45,7 @@ Prince()
     })
 ```
 
-API
----
+# API
 
 - `Prince([options]): Prince`: constructor for the API. Call this once
   for every XML/HTML to PDF conversion process.
@@ -126,13 +103,7 @@ API
   an object with `stdout` and `stderr` fields. On error, it
   resolves to an object with `error`, ` stdout` and `stderr` fields.
 
-See Also
---------
-
-Companion Grunt task [grunt-princess](https://github.com/rse/grunt-princess)
-
-License
--------
+# License
 
 - Copyright (c) 2014-2018 Ralf S. Engelschall (http://engelschall.com/)
 - Copyright (c) 2018 RAVdocs (http://ravdocs.com/)
@@ -155,4 +126,3 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
