@@ -1,4 +1,3 @@
-
 # PrinceXML
 
 [Node](http://nodejs.org/) API for executing the XML/HTML to PDF renderer [PrinceXML](http://www.princexml.com/) via `prince` CLI.
@@ -28,80 +27,76 @@ If the command did not execute successfully, verify that the `prince` binary can
 npm install @ravdocs/princexml
 ```
 
-# Usage
+# Methods
+
+## Prince.exec()
+
+Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around [`child_process.execFile`](https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback).
+
+- **inputs** `<string>` | `<string[]>` (*required*) Input file or files (XML/HTML). These can be either filepaths (local files) or urls (remote files).
+- **output** `<string>` (*required*) Output file (PDF). Use the string `'-'` in order to output a stream instead of to a file.
+- **options** `<Object>` Options to pass to the `prince` command. For a list of available options, look [here](https://www.princexml.com/doc-refs/) or run `prince --help` in the CLI.
+- **execOptions** `<Object>` Options to pass to [`child_process.execFile`](https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback).
+- **callback** `<Function>`
+	- **err** `<Error>`
+	- **stdout** `<string>` | `<Buffer>`
+	- **stderr** `<string>` | `<Buffer>`
+
+Basic example:
 
 ```js
 var Prince = require('@ravdocs/princexml');
-var util = require('utils');
 
-Prince()
-	.inputs("test.html")
-	.output("test.pdf")
-	.execute()
-	.then(function () {
-		console.log("OK: done");
-	}, function (error) {
-		console.log("ERROR: ", util.inspect(error));
-	})
+Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr) {
+	if (err) {
+		if (stderr) console
+		throw err;
+	}
+
+	console.log('Finished.');
+});
 ```
 
-# API
+More options:
 
-- `Prince([options]): Prince`: constructor for the API. Call this once
-  for every XML/HTML to PDF conversion process.
-  This returns the Prince API for further method chaining.
+```js
+var Prince = require('@ravdocs/princexml');
 
-- `Prince#binary(binary): Prince`: set the path to the prince(1) binary.
-  By default it is `prince` (in case PrinceXML was found globally
-  installed at the Node API installation time) or the path to the
-  `prince` binary of the locally installed PrinceXML distribution (in
-  case PrinceXML was not found globally installed at the Node API
-  installation time).
-  This returns the Prince API for further method chaining.
+var options = {
+	'input': 'html',
+	'structured-log': 'normal',
+	'javascript': true,
+	'pdf-profile': 'PDF/A-3b'
+};
+var execOptions = {
+	timeout: 20 * 1000
+};
 
-- `Prince#prefix(prefix): Prince`: set the path to the PrinceXML
-  installation. This by default is either empty
-  (in case PrinceXML was found globally
-  installed at the Node API installation time) or the path to the
-  locally installed PrinceXML distribution (in case PrinceXML was not
-  found globally installed at the Node API installation time).
-  This returns the Prince API for further method chaining.
+Prince.exec('test.html', 'test.pdf', options, execOptions, function(err, stdout, stderr) {
+	if (err) throw err;
 
-- `Prince#license(filename): Prince`: set the path to the PrinceXML
-  license file. This by default uses the path `license/license.dat`
-  under the PrinceXML installation.
-  This returns the Prince API for further method chaining.
+	console.log('Finished.');
+});
+```
 
-- `Prince#timeout(timeout): Prince`: set the execution timeout in milliseconds.
-  The by default it is `10000` (10s).
-  This returns the Prince API for further method chaining.
+Sending the output in an HTTP response:
 
-- `Prince#maxbuffer(maxbuffer): Prince`: set the execution maximum stdout/stderr buffer size in bytes.
-  The by default it is `10485760` (10MB).
-  This returns the Prince API for further method chaining.
+```js
+var Prince = require('@ravdocs/princexml');
+var Express = require('express');
+var app = Express();
 
-- `Prince#cwd(dirname): Prince`: set the current working directory for execution.
-  The by default it is `.` (current working directory).
-  This returns the Prince API for further method chaining.
+app.get('/', function(req, res) {
 
-- `Prince#inputs(filename): Prince`: set one (in case `filename` is a string)
-   or multiple (in case `filename` is an array of strings) input XML/HTML files.
-  This returns the Prince API for further method chaining.
+	Prince.exec('test.html', '-', null, null, function(err, stdout, stderr) {
+		if (err) return res.status(500).send(stderr);
 
-- `Prince#output(filename): Prince`: set the output PDF file.
-  This returns the Prince API for further method chaining.
+		res.contentType('application/pdf').send(stdout);
+	});
+});
 
-- `Prince#option(name, value[, forced]): Prince`: set a PrinceXML option
-  name `name` to a value `value`. The API knows the officially supported
-  options of PrinceXML 9.0 and by default rejects unknown options.
-  But arbitrary options can be passed by setting `forced` to `true`
-  in case a different PrinceXML version should be used. This returns
-  the Prince API for further method chaining.
-
-- `Prince#execute(): Promise`: asynchronously execute the conversion
-  process. This returns a promise. On success it resolves to
-  an object with `stdout` and `stderr` fields. On error, it
-  resolves to an object with `error`, ` stdout` and `stderr` fields.
+app.listen(3000);
+```
 
 # License
 

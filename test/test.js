@@ -1,6 +1,7 @@
 /*
 **  node-prince -- Node API for executing PrinceXML via prince(1) CLI
 **  Copyright (c) 2014-2018 Ralf S. Engelschall <rse@engelschall.com>
+**  Copyright (c) 2018-2019 RAVdocs
 **
 **  Permission is hereby granted, free of charge, to any person obtaining
 **  a copy of this software and associated documentation files (the
@@ -23,18 +24,12 @@
 */
 'use strict';
 
-var Prince = require('../prince-api.js');
+var Prince = require('..');
 
-Prince()
-	.inputs('./test/test.html')
-	.output('./test/test.pdf')
-	.execute()
-	.then(function (result) {
-		if (result.stdout) console.log('result.stdout:', result.stdout.toString());
-		if (result.stderr) console.log('result.stderr:', result.stderr.toString());
-		console.log('OK: done');
-	}, function (err) {
-		if (err.stdout) console.log('err.stdout:', err.stdout.toString());
-		if (err.stderr) console.log('err.stderr:', err.stderr.toString());
-		console.error(err);
-	});
+Prince.exec('./test/test.html', './test/test.pdf', null, null, function(err, stdout) {
+	if (err) throw err;
+
+	if (stdout) console.log('stdout:', stdout.toString());
+
+	console.log('OK: done');
+});
