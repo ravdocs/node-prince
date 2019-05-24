@@ -23,15 +23,18 @@
 */
 'use strict';
 
-var util = require('util');
 var Prince = require('../prince-api.js');
 
 Prince()
 	.inputs('./test/test.html')
 	.output('./test/test.pdf')
 	.execute()
-	.then(function () {
+	.then(function (result) {
+		if (result.stdout) console.log('result.stdout:', result.stdout.toString());
+		if (result.stderr) console.log('result.stderr:', result.stderr.toString());
 		console.log('OK: done');
-	}, function (error) {
-		console.log('ERROR: ', util.inspect(error));
+	}, function (err) {
+		if (err.stdout) console.log('err.stdout:', err.stdout.toString());
+		if (err.stderr) console.log('err.stderr:', err.stderr.toString());
+		console.error(err);
 	});
