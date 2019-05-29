@@ -1,6 +1,7 @@
 'use strict';
 
 var ChildProcess = require('child_process');
+var Prove = require('provejs-params');
 var ForOwn = require('lodash.forown');
 var Which = require('which');
 
@@ -99,6 +100,8 @@ var BINARY = 'prince';
 
 exports.exec = function(inputs, output, princeOptions, execFileOptions, next) {
 
+	Prove('*sooF', arguments);
+
 	if (!inputs) inputs = [];
 	if (!Array.isArray(inputs)) inputs = [inputs];
 	if (!princeOptions) princeOptions = {};
@@ -125,6 +128,8 @@ exports.exec = function(inputs, output, princeOptions, execFileOptions, next) {
 
 exports._args = function(inputs, output, princeOptions, next) {
 
+	Prove('AsOF', arguments);
+
 	var args = [];
 
 	ForOwn(princeOptions, function(value, name) {
@@ -144,6 +149,8 @@ exports._args = function(inputs, output, princeOptions, next) {
 };
 
 exports._execFileOptions = function(execFileOptions, next) {
+
+	Prove('OF', arguments);
 
 	var MILLISECOND = 1;
 	var SECOND = 1000 * MILLISECOND;
@@ -165,6 +172,8 @@ exports._execFileOptions = function(execFileOptions, next) {
 
 exports._verifyInstalled = function(next) {
 
+	Prove('F', arguments);
+
 	Which(BINARY, function(err) {
 		if (err) return next(new Error(`Cannot find "${BINARY}" binary. Verify that "${BINARY}" is installed and is in the PATH.`));
 
@@ -173,6 +182,8 @@ exports._verifyInstalled = function(next) {
 };
 
 exports._exec = function(args, options, next) {
+
+	Prove('AOF', arguments);
 
 	ChildProcess.execFile(BINARY, args, options, function(err, stdout, stderr) {
 		if (err) return next(err, stdout, stderr);
