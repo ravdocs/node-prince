@@ -41,6 +41,7 @@ Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around 
 	- **err** `<Error>`
 	- **stdout** `<string>` | `<Buffer>`
 	- **stderr** `<string>` | `<Buffer>`
+	- **duration** `<number>` Execution duration of the `prince` command, in seconds
 
 Basic example:
 

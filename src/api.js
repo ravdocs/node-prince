@@ -118,10 +118,10 @@ exports.exec = function(inputs, output, princeOptions, execFileOptions, next) {
 			exports._verifyInstalled(function(err) {
 				if (err) return next(err);
 
-				exports._exec(args, execFileOptions, function(err, stdout, stderr) {
-					if (err) return next(err, stdout, stderr);
+				exports._exec(args, execFileOptions, function(err, stdout, stderr, duration) {
+					if (err) return next(err, stdout, stderr, duration);
 
-					next(null, stdout, stderr);
+					next(null, stdout, stderr, duration);
 				});
 			});
 		});
@@ -187,15 +187,35 @@ exports._exec = function(args, options, next) {
 
 	Prove('AOF', arguments);
 
+	var min = process.hrtime.bigint();
+
 	ChildProcess.execFile(BINARY, args, options, function(err, stdout, stderr) {
-		if (err) return next(err, stdout, stderr);
+		var duration = exports._secondsSince(min);
+
+		if (err) return next(err, stdout, stderr, duration);
 
 		var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
 
-		if (m) return next(new Error(m[1]), stdout, stderr);
+		if (m) return next(new Error(m[1]), stdout, stderr, duration);
 
-		next(null, stdout, stderr);
+		next(null, stdout, stderr, duration);
 	});
+};
+
+exports._secondsSince = function(min) {
+
+	var max = process.hrtime.bigint();
+
+	var NANOSECOND = 1;
+	var MICROSECOND = NANOSECOND * 1000;
+	var MILLISECOND = MICROSECOND * 1000;
+	var SECOND = MILLISECOND * 1000;
+
+	var elapsedBigInt = max - min;
+	var elapsedNanoseconds = Number(elapsedBigInt);
+	var elapsedSeconds = elapsedNanoseconds / SECOND;
+
+	return elapsedSeconds;
 };
 
 exports.version = function(next) {
