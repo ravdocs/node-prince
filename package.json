@@ -33,7 +33,7 @@
   },
   "scripts": {
     "lint": "node_modules/.bin/eslint --rulesdir node_modules/@ravdocs/eslint/rules .",
-    "test": "node ./test/test.js"
+    "test": "mocha --recursive"
   },
   "dependencies": {
     "lodash.forown": "^4.4.0",
@@ -41,7 +41,9 @@
   },
   "devDependencies": {
     "@ravdocs/eslint": "^1.0.7",
-    "eslint": "^5.16.0"
+    "eslint": "^5.16.0",
+    "kind-of": "^6.0.2",
+    "mocha": "^6.1.4"
   },
   "publishConfig": {
     "scope": "ravdocs"
