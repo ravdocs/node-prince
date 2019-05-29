@@ -48,7 +48,6 @@ Basic example:
 var Prince = require('@ravdocs/princexml');
 
 Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr) {
-	if (stderr) console.log(stderr);
 	if (err) throw err;
 
 	console.log('Finished.');
