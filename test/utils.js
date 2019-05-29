@@ -1,6 +1,7 @@
 /* eslint-env mocha */
 'use strict';
 
+require('colors');
 var Assert = require('assert');
 var KindOf = require('kind-of');
 // var IsEmpty = require('lodash.isempty');
@@ -9,9 +10,8 @@ exports.log = function(arg1, arg2) {
 
 	var indent = ' ';
 
-	if (arg1[0] === '*') {
+	if (typeof arg1 === 'string' && arg1[0] === '*') {
 
-		if (typeof arg1 !== 'string') arg1 = JSON.stringify(arg1);
 		if (typeof arg2 !== 'string') arg2 = JSON.stringify(arg2);
 
 		if (arg1) arg1 = indent + arg1.gray;
