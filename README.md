@@ -50,6 +50,9 @@ var Prince = require('@ravdocs/princexml');
 Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr) {
 	if (err) throw err;
 
+	if (stdout.length) console.log('stdout:', stdout.toString());
+	if (stderr.length) console.log('stderr:', stderr.toString());
+
 	console.log('Finished.');
 });
 ```
@@ -71,6 +74,9 @@ var execOptions = {
 
 Prince.exec('test.html', 'test.pdf', options, execOptions, function(err, stdout, stderr) {
 	if (err) throw err;
+
+	if (stdout.length) console.log('stdout:', stdout.toString());
+	if (stderr.length) console.log('stderr:', stderr.toString());
 
 	console.log('Finished.');
 });
