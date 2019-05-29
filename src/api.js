@@ -1,9 +1,11 @@
 'use strict';
 
 var ChildProcess = require('child_process');
+var OS = require('os');
 var Prove = require('provejs-params');
 var ForOwn = require('lodash.forown');
 var Which = require('which');
+var Pkg = require('../package.json');
 
 var BINARY = 'prince';
 
@@ -194,4 +196,38 @@ exports._exec = function(args, options, next) {
 
 		next(null, stdout, stderr);
 	});
+};
+
+exports.version = function(next) {
+
+	Prove('F', arguments);
+
+	var EOL= OS.EOL;
+	var pkgName = Pkg.name;
+	var pkgVersion = Pkg.version;
+	var princeOptions = {
+		version: true
+	};
+
+	exports.exec(null, null, princeOptions, null, function(err, stdout) {
+		if (err) return next(err);
+
+		var info = stdout.toString('utf8');
+		info = exports._trimSuffix(info, EOL); // remove trailing '\r\n' or '\n'
+		info = `${pkgName} ${pkgVersion}${EOL}${info}`;
+
+		next(null, info);
+	});
+};
+
+exports._trimSuffix = function(str, suffix) {
+
+	Prove('SS', arguments);
+
+	if (!str.endsWith(suffix)) return str;
+
+	var iBeforeSuffix = -suffix.length;
+	var trimmed = str.slice(0, iBeforeSuffix);
+
+	return trimmed;
 };

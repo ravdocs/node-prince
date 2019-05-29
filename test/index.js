@@ -35,3 +35,29 @@ describe('Prince.exec()', function() {
 		});
 	});
 });
+
+describe('Prince.version()', function() {
+
+	it('should not error', function(done) {
+
+		Prince.version(function(err) {
+			if (err) return done(err);
+
+			done();
+		});
+	});
+
+	it('should return version information', function(done) {
+
+		Prince.version(function(err, info) {
+			if (err) return done(err);
+
+			// Utils.log('* info:', info);
+
+			Utils.isString(info, 'info');
+			Utils.isNotEmpty(info, 'info');
+
+			done();
+		});
+	});
+});

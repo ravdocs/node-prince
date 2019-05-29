@@ -95,3 +95,32 @@ app.get('/', function(req, res) {
 
 app.listen(3000);
 ```
+
+## Prince.version()
+
+Returns version information about this NPM module and the PrinceXML software installed.
+
+- **callback** `<Function>`
+	- **err** `<Error>`
+	- **info** `<string>`
+
+Example:
+
+```js
+var Prince = require('@ravdocs/princexml');
+
+Prince.version(function(err, info) {
+	if (err) throw err;
+
+	console.log(info);
+});
+```
+
+Output:
+
+```text
+@ravdocs/princexml 1.5.4
+Prince 12
+Copyright 2002-2018 YesLogic Pty. Ltd.
+Non-commercial License
+```

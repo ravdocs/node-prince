@@ -4,7 +4,7 @@
 require('colors');
 var Assert = require('assert');
 var KindOf = require('kind-of');
-// var IsEmpty = require('lodash.isempty');
+var IsEmpty = require('lodash.isempty');
 
 exports.log = function(arg1, arg2) {
 
@@ -61,9 +61,9 @@ exports.isBuffer = function(val, label) {
 // 	exports._isKind(val, 'object', label);
 // };
 
-// exports.isString = function(val, label) {
-// 	exports._isKind(val, 'string', label);
-// };
+exports.isString = function(val, label) {
+	exports._isKind(val, 'string', label);
+};
 
 exports._isKind = function(val, expected, label) {
 	var got = KindOf(val);
@@ -91,6 +91,6 @@ exports._isKind = function(val, expected, label) {
 // 	Assert.ok(IsEmpty(val), `Expected '${label}' to be empty but it is not.`);
 // };
 
-// exports.isNotEmpty = function(val, label) {
-// 	Assert.ok(!IsEmpty(val), `Expected '${label}' not to be empty but it is.`);
-// };
+exports.isNotEmpty = function(val, label) {
+	Assert.ok(!IsEmpty(val), `Expected '${label}' not to be empty but it is.`);
+};
