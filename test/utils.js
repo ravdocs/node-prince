@@ -25,24 +25,28 @@ exports.log = function(arg1, arg2) {
 	}
 };
 
-exports.isEqual = function(got, expected, label) {
+exports.is = function(got, expected, label) {
 	Assert.ok((got === expected), `Expected '${label}' to be '${expected}' but got '${got}'.`);
 };
+
+// exports.isNot = function(got, unexpected, label) {
+// 	Assert.ok((got !== unexpected), `Expected '${label}' not to be '${unexpected}' but got '${got}'.`);
+// };
 
 exports.isGreaterThan = function(got, expected, label) {
 	Assert.ok((got > expected), `Expected '${label}' to be greater than '${expected}' but got '${got}'.`);
 };
 
-// exports.isAtLeast = function(got, expected, label) {
-// 	Assert.ok((got >= expected), `Expected '${label}' to be at least '${expected}' but got '${got}'.`);
+// exports.isAtLeast = function(got, criterion, label) {
+// 	Assert.ok((got >= criterion), `Expected '${label}' to be at least '${criterion}' but got '${got}'.`);
 // };
 
-// exports.isAtMost = function(got, expected, label) {
-// 	Assert.ok((got <= expected), `Expected '${label}' to be at most '${expected}' but got '${got}'.`);
+// exports.isAtMost = function(got, criterion, label) {
+// 	Assert.ok((got <= criterion), `Expected '${label}' to be at most '${criterion}' but got '${got}'.`);
 // };
 
-// exports.isLessThan = function(got, expected, label) {
-// 	Assert.ok((got < expected), `Expected '${label}' to be less than '${expected}' but got '${got}'.`);
+// exports.isLessThan = function(got, criterion, label) {
+// 	Assert.ok((got < criterion), `Expected '${label}' to be less than '${criterion}' but got '${got}'.`);
 // };
 
 // exports.isArray = function(val, label) {

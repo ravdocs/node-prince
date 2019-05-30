@@ -22,8 +22,8 @@ describe('Prince.exec()', function() {
 			Utils.isNumber(meta.memoryBefore, 'meta.memoryBefore');
 			Utils.isNumber(meta.memoryAfter, 'meta.memoryAfter');
 
-			Utils.isEqual(stdout.length, 0, 'stdout.length');
-			Utils.isEqual(stderr.length, 0, 'stderr.length');
+			Utils.is(stdout.length, 0, 'stdout.length');
+			Utils.is(stderr.length, 0, 'stderr.length');
 			Utils.isNotEmpty(meta, 'meta');
 			Utils.isGreaterThan(meta.duration, 0, 'meta.duration');
 			Utils.isGreaterThan(meta.memoryBefore, 0, 'meta.memoryBefore');
@@ -42,7 +42,7 @@ describe('Prince.exec()', function() {
 
 			Utils.isBuffer(stdout, 'stdout');
 
-			Utils.isEqual(stdout.length, 30544, 'stdout.length');
+			Utils.is(stdout.length, 30544, 'stdout.length');
 
 			done();
 		});
