@@ -118,10 +118,10 @@ exports.exec = function(inputs, output, princeOptions, execFileOptions, next) {
 			exports._verifyInstalled(function(err) {
 				if (err) return next(err);
 
-				exports._exec(args, execFileOptions, function(err, stdout, stderr, duration) {
-					if (err) return next(err, stdout, stderr, duration);
+				exports._exec(args, execFileOptions, function(err, stdout, stderr, meta) {
+					if (err) return next(err, stdout, stderr, meta);
 
-					next(null, stdout, stderr, duration);
+					next(null, stdout, stderr, meta);
 				});
 			});
 		});
@@ -188,18 +188,30 @@ exports._exec = function(args, options, next) {
 	Prove('AOF', arguments);
 
 	var min = process.hrtime.bigint();
+	var memoryBefore = exports._heapUsedInMib();
 
 	ChildProcess.execFile(BINARY, args, options, function(err, stdout, stderr) {
-		var duration = exports._secondsSince(min);
+		var meta = exports._meta(min, memoryBefore);
 
-		if (err) return next(err, stdout, stderr, duration);
+		if (err) return next(err, stdout, stderr, meta);
 
 		var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
 
-		if (m) return next(new Error(m[1]), stdout, stderr, duration);
+		if (m) return next(new Error(m[1]), stdout, stderr, meta);
 
-		next(null, stdout, stderr, duration);
+		next(null, stdout, stderr, meta);
 	});
+};
+
+exports._meta = function(min, memoryBefore) {
+
+	var meta = {
+		duration: exports._secondsSince(min),
+		memoryBefore: memoryBefore,
+		memoryAfter: exports._heapUsedInMib()
+	};
+
+	return meta;
 };
 
 exports._secondsSince = function(min) {
@@ -216,6 +228,19 @@ exports._secondsSince = function(min) {
 	var elapsedSeconds = elapsedNanoseconds / SECOND;
 
 	return elapsedSeconds;
+};
+
+exports._heapUsedInMib = function() {
+
+	var BYTE = 1;
+	var KIBIBYTE = 1024 * BYTE;
+	var MEBIBYTE = 1024 * KIBIBYTE;
+
+	var memoryUsage = process.memoryUsage();
+	var heapUsed = memoryUsage.heapUsed;
+	var heapUsedMib = heapUsed / MEBIBYTE;
+
+	return heapUsedMib;
 };
 
 exports.version = function(next) {

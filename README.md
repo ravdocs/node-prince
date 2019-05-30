@@ -41,18 +41,24 @@ Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around 
 	- **err** `<Error>`
 	- **stdout** `<string>` | `<Buffer>`
 	- **stderr** `<string>` | `<Buffer>`
-	- **duration** `<number>` Execution duration of the `prince` command, in seconds
+	- **meta** `<Object>`
+		- **duration** `<number>` Execution duration, in seconds, of the `prince` command. Uses [process.hrtime.bigint](https://nodejs.org/api/process.html#process_process_hrtime_bigint).
+		- **memoryBefore** `<number>` Amount of heap used, in MiB, in V8's Resident Set before execution of the `prince` command. Uses [process.memoryUsage](https://nodejs.org/api/process.html#process_process_memoryusage).
+		- **memoryAfter** `<number>` Amount of heap used, in MiB, in V8's Resident Set after execution of the `prince` command. Uses [process.memoryUsage](https://nodejs.org/api/process.html#process_process_memoryusage).
 
 Basic example:
 
 ```js
 var Prince = require('@ravdocs/princexml');
 
-Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr) {
+Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr, meta) {
 	if (err) throw err;
 
 	if (stdout.length) console.log('stdout:', stdout.toString());
 	if (stderr.length) console.log('stderr:', stderr.toString());
+	console.log('meta.duration:', meta.duration);
+	console.log('meta.memoryBefore:', meta.memoryBefore);
+	console.log('meta.memoryAfter:', meta.memoryAfter);
 
 	console.log('Finished.');
 });
@@ -73,11 +79,14 @@ var execOptions = {
 	timeout: 20 * 1000
 };
 
-Prince.exec('test.html', 'test.pdf', options, execOptions, function(err, stdout, stderr) {
+Prince.exec('test.html', 'test.pdf', options, execOptions, function(err, stdout, stderr, meta) {
 	if (err) throw err;
 
 	if (stdout.length) console.log('stdout:', stdout.toString());
 	if (stderr.length) console.log('stderr:', stderr.toString());
+	console.log('meta.duration:', meta.duration);
+	console.log('meta.memoryBefore:', meta.memoryBefore);
+	console.log('meta.memoryAfter:', meta.memoryAfter);
 
 	console.log('Finished.');
 });
@@ -92,8 +101,12 @@ var app = Express();
 
 app.get('/', function(req, res) {
 
-	Prince.exec('test.html', '-', null, null, function(err, stdout, stderr) {
+	Prince.exec('test.html', '-', null, null, function(err, stdout, stderr, meta) {
 		if (err) return res.status(500).send(stderr);
+
+		console.log('meta.duration:', meta.duration);
+		console.log('meta.memoryBefore:', meta.memoryBefore);
+		console.log('meta.memoryAfter:', meta.memoryAfter);
 
 		res.contentType('application/pdf').send(stdout);
 	});
