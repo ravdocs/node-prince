@@ -29,6 +29,22 @@ exports.isEqual = function(got, expected, label) {
 	Assert.ok((got === expected), `Expected '${label}' to be '${expected}' but got '${got}'.`);
 };
 
+exports.isGreaterThan = function(got, expected, label) {
+	Assert.ok((got > expected), `Expected '${label}' to be greater than '${expected}' but got '${got}'.`);
+};
+
+// exports.isAtLeast = function(got, expected, label) {
+// 	Assert.ok((got >= expected), `Expected '${label}' to be at least '${expected}' but got '${got}'.`);
+// };
+
+// exports.isAtMost = function(got, expected, label) {
+// 	Assert.ok((got <= expected), `Expected '${label}' to be at most '${expected}' but got '${got}'.`);
+// };
+
+// exports.isLessThan = function(got, expected, label) {
+// 	Assert.ok((got < expected), `Expected '${label}' to be less than '${expected}' but got '${got}'.`);
+// };
+
 // exports.isArray = function(val, label) {
 // 	exports._isKind(val, 'array', label);
 // };
@@ -49,17 +65,17 @@ exports.isBuffer = function(val, label) {
 // 	exports._isKind(val, 'error', label);
 // };
 
-// exports.isNumber = function(val, label) {
-// 	exports._isKind(val, 'number', label);
-// };
+exports.isNumber = function(val, label) {
+	exports._isKind(val, 'number', label);
+};
 
 // exports.isNull = function(val, label) {
 // 	exports._isKind(val, 'null', label);
 // };
 
-// exports.isObject = function(val, label) {
-// 	exports._isKind(val, 'object', label);
-// };
+exports.isObject = function(val, label) {
+	exports._isKind(val, 'object', label);
+};
 
 exports.isString = function(val, label) {
 	exports._isKind(val, 'string', label);
