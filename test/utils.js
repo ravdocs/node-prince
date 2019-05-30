@@ -58,10 +58,10 @@ exports.isGreaterThan = function(got, expected, label) {
 // 	Assert.ok((got < criterion), `Expected '${label}' to be less than '${criterion}' but got '${got}'.`);
 // };
 
-// exports.isArray = function(val, label) {
-// 	Prove('*S', arguments);
-// 	exports._isKind(val, 'array', label);
-// };
+exports.isArray = function(val, label) {
+	Prove('*S', arguments);
+	exports._isKind(val, 'array', label);
+};
 
 // exports.isBool = function(val, label) {
 // 	Prove('*S', arguments);

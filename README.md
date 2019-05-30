@@ -143,3 +143,51 @@ Prince 12
 Copyright 2002-2018 YesLogic Pty. Ltd.
 Non-commercial License
 ```
+
+## Prince.parseStderr()
+
+Parses the stderr from [`Prince.exec()`](#princeexec) into a more structured format. Each line from stderr is parsed into an object.
+
+- **stderr** `<string>` | `<Buffer>` (*required*) The stderr returned from [`Prince.exec()`](#princeexec).
+- Returns: **rows** `<Object[]>`
+	- **type** `<string>` The type or classification of the output line. It can be 'status', 'message', 'progress', 'data', or 'final'.
+	- **name** `<string>` The name or label of the output line.
+	- **value** `<string>`
+
+When the `type` of a `row` is 'status', its `name` is ''.
+
+When the `type` of a `row` is 'message', its `name` is 'error', 'warning', 'info', 'debug', or 'output'.
+
+When the `type` of a `row` is 'progress', its `name` is 'percent'.
+
+When the `type` of a `row` is 'data', its `name` and `value` are the arguments passed to [`Log.data('name', 'value')`](https://www.princexml.com/doc-prince/#js-logging).
+
+When the `type` of a `row` is 'final', its `name` is 'outcome', and its `value` is either 'success' or 'failure'.
+
+Example:
+
+```js
+var Prince = require('@ravdocs/princexml');
+
+var options = {
+	'debug': true,
+	'structured-log': 'normal',
+	'javascript': true
+};
+
+Prince.exec('test.html', 'test.pdf', options, null, function(err, stdout, stderr) {
+	if (err) throw err;
+
+	var rows = Prince.parseStderr(stderr);
+
+	rows.forEach(function(row) {
+		if (row.type === 'status') {
+			console.log(`${row.type}|${row.value}`);
+		} else {
+			console.log(`${row.type}|${row.name}|${row.value}`);
+		}
+	});
+
+	console.log(rows);
+});
+```
