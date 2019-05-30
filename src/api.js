@@ -263,7 +263,7 @@ exports.version = function(next) {
 	exports.exec(null, null, princeOptions, null, function(err, stdout) {
 		if (err) return next(err);
 
-		var info = stdout.toString('utf8');
+		var info = stdout.toString();
 		info = exports._trimSuffix(info, EOL); // remove trailing '\r\n' or '\n'
 		info = `${pkgName} ${pkgVersion}${EOL}${info}`;
 
