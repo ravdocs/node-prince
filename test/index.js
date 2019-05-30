@@ -13,7 +13,7 @@ describe('Prince.exec()', function() {
 
 			// Utils.log('* stdout:', stdout);
 			// Utils.log('* stderr:', stderr);
-			Utils.log('* meta:', meta);
+			// Utils.log('* meta:', meta);
 
 			Utils.isBuffer(stdout, 'stdout');
 			Utils.isBuffer(stderr, 'stderr');
