@@ -253,9 +253,6 @@ exports.version = function(next) {
 
 	Prove('F', arguments);
 
-	var EOL= OS.EOL;
-	var pkgName = Pkg.name;
-	var pkgVersion = Pkg.version;
 	var princeOptions = {
 		version: true
 	};
@@ -263,12 +260,27 @@ exports.version = function(next) {
 	exports.exec(null, null, princeOptions, null, function(err, stdout) {
 		if (err) return next(err);
 
-		var info = stdout.toString();
-		info = exports._trimSuffix(info, EOL); // remove trailing '\r\n' or '\n'
-		info = `${pkgName} ${pkgVersion}${EOL}${info}`;
+		exports._versionInfo(stdout, function(err, info) {
+			if (err) return next(err);
 
-		next(null, info);
+			next(null, info);
+		});
 	});
+};
+
+exports._versionInfo = function(stdout, next) {
+
+	Prove('*F', arguments);
+
+	var EOL= OS.EOL;
+	var pkgName = Pkg.name;
+	var pkgVersion = Pkg.version;
+
+	var info = stdout.toString();
+	info = exports._trimSuffix(info, EOL); // remove trailing '\r\n' or '\n'
+	info = `${pkgName} ${pkgVersion}${EOL}${info}`;
+
+	next(null, info);
 };
 
 exports._trimSuffix = function(str, suffix) {
