@@ -205,6 +205,8 @@ exports._exec = function(args, options, next) {
 
 exports._meta = function(min, memoryBefore) {
 
+	Prove('*N', arguments);
+
 	var meta = {
 		duration: exports._secondsSince(min),
 		memoryBefore: memoryBefore,
@@ -215,6 +217,8 @@ exports._meta = function(min, memoryBefore) {
 };
 
 exports._secondsSince = function(min) {
+
+	Prove('*', arguments);
 
 	var max = process.hrtime.bigint();
 
@@ -231,6 +235,8 @@ exports._secondsSince = function(min) {
 };
 
 exports._heapUsedInMib = function() {
+
+	// Prove('', arguments);
 
 	var BYTE = 1;
 	var KIBIBYTE = 1024 * BYTE;
