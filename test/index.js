@@ -11,8 +11,8 @@ describe('Prince.exec()', function() {
 		Prince.exec(`${__dirname}/inputs/basic.html`, `${__dirname}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
 			if (err) return done(err);
 
-			// Utils.log('* stdout:', stdout);
-			// Utils.log('* stderr:', stderr);
+			// Utils.log('* stdout:', stdout.toString());
+			// Utils.log('* stderr:', stderr.toString());
 			// Utils.log('* meta:', meta);
 
 			Utils.isBuffer(stdout, 'stdout');
@@ -38,7 +38,7 @@ describe('Prince.exec()', function() {
 		Prince.exec(`${__dirname}/inputs/basic.html`, '-', null, null, function(err, stdout) {
 			if (err) return done(err);
 
-			// Utils.log('* stdout:', stdout);
+			// Utils.log('* stdout:', stdout.toString());
 
 			Utils.isBuffer(stdout, 'stdout');
 
