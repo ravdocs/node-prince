@@ -2,8 +2,9 @@
 
 var Prove = require('provejs-params');
 var ChildProcess = require('child_process');
-var ForOwn = require('lodash.forown');
 var Which = require('which');
+var _ = {};
+_.forOwn = require('lodash.forown');
 
 var BINARY = 'prince';
 
@@ -132,7 +133,7 @@ exports._args = function(inputs, output, princeOptions, next) {
 
 	var args = [];
 
-	ForOwn(princeOptions, function(value, name) {
+	_.forOwn(princeOptions, function(value, name) {
 		var isFlag = (value === true);
 
 		args.push(`--${name}`);

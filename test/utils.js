@@ -5,7 +5,8 @@ require('colors');
 var Prove = require('provejs-params');
 var Assert = require('assert');
 var KindOf = require('kind-of');
-var IsEmpty = require('lodash.isempty');
+var _ = {};
+_.IsEmpty = require('lodash.isempty');
 
 exports.log = function(arg1, arg2) {
 
@@ -132,10 +133,10 @@ exports._isKind = function(val, expected, label) {
 
 // exports.isEmpty = function(val, label) {
 // 	Prove('*S', arguments);
-// 	Assert.ok(IsEmpty(val), `Expected '${label}' to be empty but it is not.`);
+// 	Assert.ok(_.IsEmpty(val), `Expected '${label}' to be empty but it is not.`);
 // };
 
 exports.isNotEmpty = function(val, label) {
 	Prove('*S', arguments);
-	Assert.ok(!IsEmpty(val), `Expected '${label}' not to be empty but it is.`);
+	Assert.ok(!_.IsEmpty(val), `Expected '${label}' not to be empty but it is.`);
 };
