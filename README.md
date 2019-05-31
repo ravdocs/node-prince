@@ -144,25 +144,27 @@ Copyright 2002-2018 YesLogic Pty. Ltd.
 Non-commercial License
 ```
 
-## Prince.parseStderr()
+## Prince.logs()
 
-Parses the stderr from [`Prince.exec()`](#princeexec) into a more structured format. Each line from stderr is parsed into an object.
+Extracts any [structured logs](https://www.princexml.com/doc-prince/#structured-log) from the stderr outputted by [`Prince.exec()`](#princeexec), parses them, and returns them in object format.
 
 - **stderr** `<string>` | `<Buffer>` (*required*) The stderr returned from [`Prince.exec()`](#princeexec).
-- Returns: **rows** `<Object[]>`
-	- **type** `<string>` The type or classification of the output line. It can be 'status', 'message', 'progress', 'data', or 'final'.
-	- **name** `<string>` The name or label of the output line.
-	- **value** `<string>`
+- Returns: **logs** `<Object[]>`
+	- **type** `<string>` The type or classification of the log. It can be 'status', 'message', 'progress', 'data', or 'final'.
+	- **name** `<string>` The name or label of the log.
+	- **value** `<string>` The descriptive content of the log.
 
-When the `type` of a `row` is 'status', its `name` is ''.
+When the `type` of a `log` is 'status', its `name` is ''.
 
-When the `type` of a `row` is 'message', its `name` is 'error', 'warning', 'info', 'debug', or 'output'.
+When the `type` of a `log` is 'message', its `name` is 'error', 'warning', 'info', 'debug', or 'output'.
 
-When the `type` of a `row` is 'progress', its `name` is 'percent'.
+When the `type` of a `log` is 'progress', its `name` is 'percent'.
 
-When the `type` of a `row` is 'data', its `name` and `value` are the arguments passed to [`Log.data('name', 'value')`](https://www.princexml.com/doc-prince/#js-logging).
+When the `type` of a `log` is 'data', its `name` and `value` are the arguments passed to [`Log.data('name', 'value')`](https://www.princexml.com/doc-prince/#js-logging).
 
-When the `type` of a `row` is 'final', its `name` is 'outcome', and its `value` is either 'success' or 'failure'.
+When the `type` of a `log` is 'final', its `name` is 'outcome', and its `value` is either 'success' or 'failure'.
+
+Note that the [`structured-log`](https://www.princexml.com/doc-prince/#structured-log) option must have been passed to [`Prince.exec()`](#princeexec) in order for this method to be able to extract any logs from the stderr.
 
 Example:
 
@@ -178,16 +180,16 @@ var options = {
 Prince.exec('test.html', 'test.pdf', options, null, function(err, stdout, stderr) {
 	if (err) throw err;
 
-	var rows = Prince.parseStderr(stderr);
+	var logs = Prince.logs(stderr);
 
-	rows.forEach(function(row) {
-		if (row.type === 'status') {
-			console.log(`${row.type}|${row.value}`);
+	logs.forEach(function(log) {
+		if (log.type === 'status') {
+			console.log(`${log.type}|${log.value}`);
 		} else {
-			console.log(`${row.type}|${row.name}|${row.value}`);
+			console.log(`${log.type}|${log.name}|${log.value}`);
 		}
 	});
 
-	console.log(rows);
+	console.log(logs);
 });
 ```

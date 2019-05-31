@@ -295,7 +295,7 @@ exports._trimSuffix = function(str, suffix) {
 	return trimmed;
 };
 
-exports.parseStderr = function(stderr) {
+exports.logs = function(stderr) {
 
 	Prove('*', arguments);
 
@@ -304,10 +304,10 @@ exports.parseStderr = function(stderr) {
 
 	stderr = stderr.replace(/^msg\|((err)|(wrn)|(inf)|(dbg))\|\|/mg, 'msg|$1|'); // workaround for current bug where message is 'msg|...||...' instead of 'msg|...|...'
 	var lines = stderr.split(/\r?\n/);
-	var rows = lines.map(exports._stderrRow);
-	rows = exports._compact(rows); // remove any rows whose lines were not parsable
+	var logs = lines.map(exports._log);
+	logs = exports._compact(logs); // remove any null logs, i.e., lines which were not parsable
 
-	return rows;
+	return logs;
 };
 
 exports._compact = function(arr) {
@@ -319,24 +319,24 @@ exports._compact = function(arr) {
 	});
 };
 
-exports._stderrRow = function(line) {
+exports._log = function(line) {
 
 	Prove('SNA', arguments);
 
 	var parts = line.split('|');
 
 	switch (parts[0]) {
-		case 'sta': return exports._stderrRowStatus(parts);
-		case 'msg': return exports._stderrRowMessage(parts);
-		case 'prg': return exports._stderrRowProgress(parts);
-		case 'dat': return exports._stderrRowData(parts);
-		case 'fin': return exports._stderrRowFinal(parts);
+		case 'sta': return exports._logStatus(parts);
+		case 'msg': return exports._logMessage(parts);
+		case 'prg': return exports._logProgress(parts);
+		case 'dat': return exports._logData(parts);
+		case 'fin': return exports._logFinal(parts);
 		default: return null;
 	}
 };
 
 // 'sta|...' is a status message.
-exports._stderrRowStatus = function(parts) {
+exports._logStatus = function(parts) {
 
 	Prove('A', arguments);
 
@@ -356,18 +356,18 @@ exports._stderrRowStatus = function(parts) {
 // - 'msg|out|...': console output from `console.log()`
 // Note: Currently (Prince 12), 'msg|err|...', 'msg|wrn|...', 'msg|inf|...',
 // and 'msg|dbg|...' are formatted incorrectly as 'msg|...||...'.
-exports._stderrRowMessage = function(parts) {
+exports._logMessage = function(parts) {
 
 	Prove('A', arguments);
 
 	return {
 		type: 'message',
-		name: exports._stderrRowMessageName(parts[1]),
-		value: exports._stderrRowValue(parts, 2)
+		name: exports._logMessageName(parts[1]),
+		value: exports._logValue(parts, 2)
 	};
 };
 
-exports._stderrRowMessageName = function(abbr) {
+exports._logMessageName = function(abbr) {
 
 	Prove('S', arguments);
 
@@ -385,7 +385,7 @@ exports._stderrRowMessageName = function(abbr) {
 // However, the value may have had one or more '|' in it, and, if so, the
 // value will have been split into multiple parts. In this case, they must
 // be rejoined by '|'.
-exports._stderrRowValue = function(parts, i) {
+exports._logValue = function(parts, i) {
 
 	Prove('AN', arguments);
 
@@ -395,7 +395,7 @@ exports._stderrRowValue = function(parts, i) {
 // 'prg|...' is a progress percentage.
 // It is in the format 'prg|{{percent}}', where '{{percent}}' is 0, 100, or any
 // number in between.
-exports._stderrRowProgress = function(parts) {
+exports._logProgress = function(parts) {
 
 	Prove('A', arguments);
 
@@ -407,14 +407,14 @@ exports._stderrRowProgress = function(parts) {
 };
 
 // 'dat|name|value' is a data message produced by `Log.data("name", "value")`.
-exports._stderrRowData = function(parts) {
+exports._logData = function(parts) {
 
 	Prove('A', arguments);
 
 	return {
 		type: 'data',
 		name: parts[1],
-		value: exports._stderrRowValue(parts, 2)
+		value: exports._logValue(parts, 2)
 	};
 };
 
@@ -422,7 +422,7 @@ exports._stderrRowData = function(parts) {
 // It is one of the following:
 // - 'fin|success'
 // - 'fin|failure'
-exports._stderrRowFinal = function(parts) {
+exports._logFinal = function(parts) {
 
 	Prove('A', arguments);
 
