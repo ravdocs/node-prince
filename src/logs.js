@@ -11,39 +11,30 @@ module.exports = function(stderr) {
 
 	stderr = stderr.replace(/^msg\|((err)|(wrn)|(inf)|(dbg))\|\|/mg, 'msg|$1|'); // workaround for current bug where message is 'msg|...||...' instead of 'msg|...|...'
 	var lines = stderr.split(/\r?\n/);
-	var logs = lines.map(exports._log);
+	var logs = lines.map(exports._newLog);
 	logs = exports._compact(logs); // remove any null logs, i.e., lines which were not parsable
 
 	return logs;
 };
 
-exports._compact = function(arr) {
-
-	Prove('A', arguments);
-
-	return arr.filter(function(val) {
-		return (!!val);
-	});
-};
-
-exports._log = function(line) {
+exports._newLog = function(line) {
 
 	Prove('SNA', arguments);
 
 	var parts = line.split('|');
 
 	switch (parts[0]) {
-		case 'sta': return exports._logStatus(parts);
-		case 'msg': return exports._logMessage(parts);
-		case 'prg': return exports._logProgress(parts);
-		case 'dat': return exports._logData(parts);
-		case 'fin': return exports._logFinal(parts);
+		case 'sta': return exports._newLogStatus(parts);
+		case 'msg': return exports._newLogMessage(parts);
+		case 'prg': return exports._newLogProgress(parts);
+		case 'dat': return exports._newLogData(parts);
+		case 'fin': return exports._newLogFinal(parts);
 		default: return null;
 	}
 };
 
 // 'sta|...' is a status message.
-exports._logStatus = function(parts) {
+exports._newLogStatus = function(parts) {
 
 	Prove('A', arguments);
 
@@ -63,18 +54,18 @@ exports._logStatus = function(parts) {
 // - 'msg|out|...': console output from `console.log()`
 // Note: Currently (Prince 12), 'msg|err|...', 'msg|wrn|...', 'msg|inf|...',
 // and 'msg|dbg|...' are formatted incorrectly as 'msg|...||...'.
-exports._logMessage = function(parts) {
+exports._newLogMessage = function(parts) {
 
 	Prove('A', arguments);
 
 	return {
 		type: 'message',
-		name: exports._logMessageName(parts[1]),
-		value: exports._logValue(parts, 2)
+		name: exports._messageName(parts[1]),
+		value: exports._value(parts, 2)
 	};
 };
 
-exports._logMessageName = function(abbr) {
+exports._messageName = function(abbr) {
 
 	Prove('S', arguments);
 
@@ -92,7 +83,7 @@ exports._logMessageName = function(abbr) {
 // However, the value may have had one or more '|' in it, and, if so, the
 // value will have been split into multiple parts. In this case, they must
 // be rejoined by '|'.
-exports._logValue = function(parts, i) {
+exports._value = function(parts, i) {
 
 	Prove('AN', arguments);
 
@@ -102,7 +93,7 @@ exports._logValue = function(parts, i) {
 // 'prg|...' is a progress percentage.
 // It is in the format 'prg|{{percent}}', where '{{percent}}' is 0, 100, or any
 // number in between.
-exports._logProgress = function(parts) {
+exports._newLogProgress = function(parts) {
 
 	Prove('A', arguments);
 
@@ -114,14 +105,14 @@ exports._logProgress = function(parts) {
 };
 
 // 'dat|name|value' is a data message produced by `Log.data("name", "value")`.
-exports._logData = function(parts) {
+exports._newLogData = function(parts) {
 
 	Prove('A', arguments);
 
 	return {
 		type: 'data',
 		name: parts[1],
-		value: exports._logValue(parts, 2)
+		value: exports._value(parts, 2)
 	};
 };
 
@@ -129,7 +120,7 @@ exports._logData = function(parts) {
 // It is one of the following:
 // - 'fin|success'
 // - 'fin|failure'
-exports._logFinal = function(parts) {
+exports._newLogFinal = function(parts) {
 
 	Prove('A', arguments);
 
@@ -138,4 +129,13 @@ exports._logFinal = function(parts) {
 		name: 'outcome',
 		value: parts[1]
 	};
+};
+
+exports._compact = function(arr) {
+
+	Prove('A', arguments);
+
+	return arr.filter(function(val) {
+		return (!!val);
+	});
 };
