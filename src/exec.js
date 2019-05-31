@@ -193,8 +193,9 @@ exports._exec = function(args, options, next) {
 
 		if (err) return next(err, stdout, stderr, meta);
 
+		// todo: If Prince returns an error status code in this scenario, then
+		// this condition will never be true, making this code unnecessary.
 		var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
-
 		if (m) return next(new Error(m[1]), stdout, stderr, meta);
 
 		next(null, stdout, stderr, meta);
