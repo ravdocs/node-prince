@@ -12,7 +12,7 @@ describe('Prince.exec()', function() {
 		var stdoutExpected = Buffer.from('');
 		var stderrExpected = Buffer.from('');
 
-		Prince.exec(`${__dirname}/inputs/basic.html`, `${__dirname}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
+		Prince.exec(`${__dirname}/fixtures/basic.html`, `${__dirname}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
 			if (err) return done(err);
 
 			// Utils.log('* stdout:', stdout.toString());
@@ -38,7 +38,7 @@ describe('Prince.exec()', function() {
 
 	it('should return pdf to stdout when output is \'-\'', function(done) {
 
-		Prince.exec(`${__dirname}/inputs/basic.html`, '-', null, null, function(err, stdout) {
+		Prince.exec(`${__dirname}/fixtures/basic.html`, '-', null, null, function(err, stdout) {
 			if (err) return done(err);
 
 			// Utils.log('* stdout:', stdout.toString());
