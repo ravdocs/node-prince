@@ -292,4 +292,17 @@ describe('Prince.logs()', function() {
 
 		done();
 	});
+
+	it('should return empty array when stderr is empty', function(done) {
+
+		var stderr;
+		var logs = Prince.logs(stderr);
+		var expected = [];
+
+		// Utils.log('* logs:', logs);
+
+		Assert.deepStrictEqual('logs', logs, expected);
+
+		done();
+	});
 });

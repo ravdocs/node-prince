@@ -7,7 +7,7 @@ module.exports = function(stderr) {
 	Prove('*', arguments);
 
 	if (Buffer.isBuffer(stderr)) stderr = stderr.toString();
-	if (typeof stderr !== 'string') return;
+	if (typeof stderr !== 'string') return [];
 
 	stderr = stderr.replace(/^msg\|((err)|(wrn)|(inf)|(dbg))\|\|/mg, 'msg|$1|'); // workaround for current bug where message is 'msg|...||...' instead of 'msg|...|...'
 	var lines = stderr.split(/\r?\n/);
