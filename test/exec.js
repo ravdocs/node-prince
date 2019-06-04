@@ -24,13 +24,13 @@ describe('Prince.exec()', function() {
 
 			Assert.isObject('meta', meta);
 			Assert.isNumber('meta.duration', meta.duration);
-			Assert.isNumber('meta.memoryBefore', meta.memoryBefore);
-			Assert.isNumber('meta.memoryAfter', meta.memoryAfter);
+			Assert.isNumber('meta.memoryFreeBefore', meta.memoryFreeBefore);
+			Assert.isNumber('meta.memoryFreeAfter', meta.memoryFreeAfter);
 
 			Assert.isNotEmpty('meta', meta);
 			Assert.isGreaterThan('meta.duration', meta.duration, 0);
-			Assert.isGreaterThan('meta.memoryBefore', meta.memoryBefore, 0);
-			Assert.isGreaterThan('meta.memoryAfter', meta.memoryAfter, 0);
+			Assert.isGreaterThan('meta.memoryFreeBefore', meta.memoryFreeBefore, 0);
+			Assert.isGreaterThan('meta.memoryFreeAfter', meta.memoryFreeAfter, 0);
 
 			done();
 		});

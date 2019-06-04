@@ -3,6 +3,7 @@
 var Prove = require('provejs-params');
 var ChildProcess = require('child_process');
 var Which = require('which');
+var Free = require('free-memory');
 var _ = {};
 _.forOwn = require('lodash.forown');
 
@@ -186,31 +187,41 @@ exports._exec = function(args, options, next) {
 
 	Prove('AOF', arguments);
 
-	var min = process.hrtime.bigint();
-	var memoryBefore = exports._heapUsedInMib();
+	exports._memoryFree(function(err, memoryFreeBefore) {
+		if (err) memoryFreeBefore = 0; // do not stop if memory cannot be measured
 
-	ChildProcess.execFile(BINARY, args, options, function(err, stdout, stderr) {
-		var meta = exports._meta(min, memoryBefore);
+		var min = process.hrtime.bigint();
 
-		if (err) return next(err, stdout, stderr, meta);
+		ChildProcess.execFile(BINARY, args, options, function(errExec, stdout, stderr) {
 
-		// todo: If Prince returns an error status code in this scenario, then
-		// this condition will never be true, making this code unnecessary.
-		var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
-		if (m) return next(new Error(m[1]), stdout, stderr, meta);
+			var duration = exports._secondsSince(min);
 
-		next(null, stdout, stderr, meta);
+			exports._memoryFree(function(errMem, memoryFreeAfter) {
+				if (errMem) memoryFreeAfter = 0; // do not stop if memory cannot be measured
+
+				var meta = exports._meta(duration, memoryFreeBefore, memoryFreeAfter);
+
+				if (errExec) return next(errExec, stdout, stderr, meta);
+
+				// todo: If Prince returns an error status code in this scenario, then
+				// this condition will never be true, making this code unnecessary.
+				var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
+				if (m) return next(new Error(m[1]), stdout, stderr, meta);
+
+				next(null, stdout, stderr, meta);
+			});
+		});
 	});
 };
 
-exports._meta = function(min, memoryBefore) {
+exports._meta = function(duration, memoryFreeBefore, memoryFreeAfter) {
 
-	Prove('*N', arguments);
+	Prove('*NN', arguments);
 
 	var meta = {
-		duration: exports._secondsSince(min),
-		memoryBefore: memoryBefore,
-		memoryAfter: exports._heapUsedInMib()
+		duration: duration,
+		memoryFreeBefore: memoryFreeBefore,
+		memoryFreeAfter: memoryFreeAfter
 	};
 
 	return meta;
@@ -234,17 +245,37 @@ exports._secondsSince = function(min) {
 	return elapsedSeconds;
 };
 
-exports._heapUsedInMib = function() {
+exports._memoryFree = function(next) {
 
-	// Prove('', arguments);
+	Prove('F', arguments);
 
-	var BYTE = 1;
-	var KIBIBYTE = 1024 * BYTE;
+	switch (process.platform) {
+		case 'win32': return exports._memoryFreeWindows(next);
+		default: return exports._memoryFreeUnix(next);
+	}
+};
+
+exports._memoryFreeWindows = function(next) {
+
+	Prove('F', arguments);
+
+	// Windows is not supported currently.
+	next(null, 0);
+};
+
+exports._memoryFreeUnix = function(next) {
+
+	Prove('F', arguments);
+
+	var KIBIBYTE = 1;
 	var MEBIBYTE = 1024 * KIBIBYTE;
 
-	var memoryUsage = process.memoryUsage();
-	var heapUsed = memoryUsage.heapUsed;
-	var heapUsedMib = heapUsed / MEBIBYTE;
+	Free(function(err, info) {
+		if (err) return next(err);
 
-	return heapUsedMib;
+		var used = info.mem.used;
+		var usedMib = used / MEBIBYTE;
+
+		next(null, usedMib);
+	});
 };

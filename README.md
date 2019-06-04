@@ -43,8 +43,8 @@ Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around 
 	- **stderr** `<string>` | `<Buffer>`
 	- **meta** `<Object>`
 		- **duration** `<number>` Execution duration, in seconds, of the `prince` command. Uses [process.hrtime.bigint](https://nodejs.org/api/process.html#process_process_hrtime_bigint).
-		- **memoryBefore** `<number>` Amount of heap used, in MiB, in V8's Resident Set before execution of the `prince` command. Uses [process.memoryUsage](https://nodejs.org/api/process.html#process_process_memoryusage).
-		- **memoryAfter** `<number>` Amount of heap used, in MiB, in V8's Resident Set after execution of the `prince` command. Uses [process.memoryUsage](https://nodejs.org/api/process.html#process_process_memoryusage).
+		- **memoryFreeBefore** `<number>` Amount of system memory free, in MiB, before execution of the `prince` command. If the system does not have the command `free` (e.g., Windows), this value will be 0.
+		- **memoryFreeAfter** `<number>` Amount of system memory free, in MiB, after execution of the `prince` command. If the system does not have the command `free` (e.g., Windows), this value will be 0.
 
 Basic example:
 
@@ -57,8 +57,8 @@ Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr, m
 	if (stdout.length) console.log('stdout:', stdout.toString());
 	if (stderr.length) console.log('stderr:', stderr.toString());
 	console.log('meta.duration:', meta.duration);
-	console.log('meta.memoryBefore:', meta.memoryBefore);
-	console.log('meta.memoryAfter:', meta.memoryAfter);
+	console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
+	console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
 
 	console.log('Finished.');
 });
@@ -85,8 +85,8 @@ Prince.exec('test.html', 'test.pdf', princeOptions, execOptions, function(err, s
 	if (stdout.length) console.log('stdout:', stdout.toString());
 	if (stderr.length) console.log('stderr:', stderr.toString());
 	console.log('meta.duration:', meta.duration);
-	console.log('meta.memoryBefore:', meta.memoryBefore);
-	console.log('meta.memoryAfter:', meta.memoryAfter);
+	console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
+	console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
 
 	console.log('Finished.');
 });
@@ -105,8 +105,8 @@ app.get('/', function(req, res) {
 		if (err) return res.status(500).send(stderr);
 
 		console.log('meta.duration:', meta.duration);
-		console.log('meta.memoryBefore:', meta.memoryBefore);
-		console.log('meta.memoryAfter:', meta.memoryAfter);
+		console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
+		console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
 
 		res.contentType('application/pdf').send(stdout);
 	});
