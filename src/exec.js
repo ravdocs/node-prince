@@ -273,9 +273,9 @@ exports._memoryFreeUnix = function(next) {
 	Free(function(err, info) {
 		if (err) return next(err);
 
-		var used = info.mem.used;
-		var usedMib = used / MEBIBYTE;
+		var free = info.mem.free;
+		var freeMib = free / MEBIBYTE;
 
-		next(null, usedMib);
+		next(null, freeMib);
 	});
 };
