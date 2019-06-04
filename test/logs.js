@@ -262,4 +262,34 @@ describe('Prince.logs()', function() {
 
 		done();
 	});
+
+	it('should accept stderr as type Buffer', function(done) {
+
+		var stderr = Buffer.from('sta|Loading document...');
+		var logs = Prince.logs(stderr);
+		var expected = [
+			{type: 'status', name: '', value: 'Loading document...'}
+		];
+
+		// Utils.log('* logs:', logs);
+
+		Assert.deepStrictEqual('logs', logs, expected);
+
+		done();
+	});
+
+	it('should accept stderr as type string', function(done) {
+
+		var stderr = 'sta|Loading document...';
+		var logs = Prince.logs(stderr);
+		var expected = [
+			{type: 'status', name: '', value: 'Loading document...'}
+		];
+
+		// Utils.log('* logs:', logs);
+
+		Assert.deepStrictEqual('logs', logs, expected);
+
+		done();
+	});
 });
