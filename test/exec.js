@@ -1,12 +1,16 @@
 /* eslint-env mocha */
 'use strict';
 
+var Assert = require('@ravdocs/assert');
 var Prince = require('..');
-var Utils = require('./utils');
+// var Utils = require('./utils');
 
 describe('Prince.exec()', function() {
 
 	it('should return data in correct format', function(done) {
+
+		var stdoutExpected = Buffer.from('');
+		var stderrExpected = Buffer.from('');
 
 		Prince.exec(`${__dirname}/inputs/basic.html`, `${__dirname}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
 			if (err) return done(err);
@@ -15,19 +19,18 @@ describe('Prince.exec()', function() {
 			// Utils.log('* stderr:', stderr.toString());
 			// Utils.log('* meta:', meta);
 
-			Utils.isBuffer(stdout, 'stdout');
-			Utils.isBuffer(stderr, 'stderr');
-			Utils.isObject(meta, 'meta');
-			Utils.isNumber(meta.duration, 'meta.duration');
-			Utils.isNumber(meta.memoryBefore, 'meta.memoryBefore');
-			Utils.isNumber(meta.memoryAfter, 'meta.memoryAfter');
+			Assert.deepStrictEqual('stdout', stdout, stdoutExpected);
+			Assert.deepStrictEqual('stderr', stderr, stderrExpected);
 
-			Utils.is(stdout.length, 0, 'stdout.length');
-			Utils.is(stderr.length, 0, 'stderr.length');
-			Utils.isNotEmpty(meta, 'meta');
-			Utils.isGreaterThan(meta.duration, 0, 'meta.duration');
-			Utils.isGreaterThan(meta.memoryBefore, 0, 'meta.memoryBefore');
-			Utils.isGreaterThan(meta.memoryAfter, 0, 'meta.memoryAfter');
+			Assert.isObject('meta', meta);
+			Assert.isNumber('meta.duration', meta.duration);
+			Assert.isNumber('meta.memoryBefore', meta.memoryBefore);
+			Assert.isNumber('meta.memoryAfter', meta.memoryAfter);
+
+			Assert.isNotEmpty('meta', meta);
+			Assert.isGreaterThan('meta.duration', meta.duration, 0);
+			Assert.isGreaterThan('meta.memoryBefore', meta.memoryBefore, 0);
+			Assert.isGreaterThan('meta.memoryAfter', meta.memoryAfter, 0);
 
 			done();
 		});
@@ -40,9 +43,9 @@ describe('Prince.exec()', function() {
 
 			// Utils.log('* stdout:', stdout.toString());
 
-			Utils.isBuffer(stdout, 'stdout');
+			Assert.isBuffer('stdout', stdout);
 
-			Utils.is(stdout.length, 30544, 'stdout.length');
+			Assert.strictEqual('stdout.length', stdout.length, 30544);
 
 			done();
 		});
