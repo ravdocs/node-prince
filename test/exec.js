@@ -9,6 +9,7 @@ describe('Prince.exec()', function() {
 
 	it('should return data in correct format', function(done) {
 
+		var isWindows = (process.platform === 'win32');
 		var stdoutExpected = Buffer.from('');
 		var stderrExpected = Buffer.from('');
 
@@ -29,8 +30,8 @@ describe('Prince.exec()', function() {
 
 			Assert.isNotEmpty('meta', meta);
 			Assert.isGreaterThan('meta.duration', meta.duration, 0);
-			Assert.isGreaterThan('meta.memoryFreeBefore', meta.memoryFreeBefore, 0);
-			Assert.isGreaterThan('meta.memoryFreeAfter', meta.memoryFreeAfter, 0);
+			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeBefore', meta.memoryFreeBefore, 0);
+			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeAfter', meta.memoryFreeAfter, 0);
 
 			done();
 		});
