@@ -125,11 +125,22 @@ exports._newLogData = function(parts) {
 
 	Prove('A', arguments);
 
+	var value = exports._value(parts, 2);
+	var parsed;
+
+	// todo: test if value is json and convert to json if possible.
+	try {
+		parsed = JSON.parse(value);
+		value = parsed;
+	} catch (e) {
+		// do nothing
+	}
+
 	return {
 		type: 'data',
 		source: 'engine/pdf',
 		name: parts[1],
-		value: exports._value(parts, 2)
+		value: value
 	};
 };
 

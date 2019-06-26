@@ -223,7 +223,7 @@ describe('Prince.logs()', function() {
 			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Running scripts...'},
 			{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'},
 			{type: 'info', source: 'engine/pdf', name: 'info', value: 'used font: Times New Roman, Regular'},
-			{type: 'data', source: 'engine/pdf', name: 'total-page-count', value: '1'},
+			{type: 'data', source: 'engine/pdf', name: 'total-page-count', value: 1},
 			{type: 'info', source: 'engine/pdf', name: 'progress-percent', value: '100'},
 			{type: 'info', source: 'engine/pdf', name: 'document', value: 'success'}
 		];
