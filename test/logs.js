@@ -12,9 +12,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('sta|Loading document...');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'status', name: '', value: 'Loading document...'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'status', value: 'Loading document...'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -27,9 +25,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|err|Test error');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'error', value: 'Test error'}
-		];
+		var expected = [{type: 'error', source: 'engine/pdf', name: 'error', value: 'Test error'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -42,9 +38,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|wrn|http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'}
-		];
+		var expected = [{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -57,9 +51,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|inf|loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'info', value: 'loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'info', value: 'loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -72,9 +64,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|dbg|loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'debug', value: 'loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'debug', value: 'loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -87,9 +77,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|out|Some message from console.log');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'output', value: 'Some message from console.log'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'output', value: 'Some message from console.log'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -102,9 +90,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('prg|0');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'progress', name: 'percent', value: '0'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'progress-percent', value: '0'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -117,9 +103,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('dat|key|val');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'data', name: 'key', value: 'val'}
-		];
+		var expected = [{type: 'data', source: 'engine/pdf', name: 'key', value: 'val'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -132,9 +116,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('fin|success');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'final', name: 'outcome', value: 'success'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'document', value: 'success'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -147,9 +129,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('fin|failure');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'final', name: 'outcome', value: 'failure'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'document', value: 'failure'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -162,9 +142,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|err||Test error');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'error', value: 'Test error'}
-		];
+		var expected = [{type: 'error', source: 'engine/pdf', name: 'error', value: 'Test error'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -177,9 +155,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|wrn||http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'}
-		];
+		var expected = [{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -192,9 +168,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|inf||loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'info', value: 'loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'info', value: 'loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -207,9 +181,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|dbg||loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [
-			{type: 'message', name: 'debug', value: 'loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}
-		];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'debug', value: 'loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -248,12 +220,12 @@ describe('Prince.logs()', function() {
 		var stderr = Buffer.from(stderrStr);
 		var logs = Prince.logs(stderr);
 		var expected = [
-			{type: 'status', name: '', value: 'Running scripts...'},
-			{type: 'message', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'},
-			{type: 'message', name: 'info', value: 'used font: Times New Roman, Regular'},
-			{type: 'data', name: 'total-page-count', value: '1'},
-			{type: 'progress', name: 'percent', value: '100'},
-			{type: 'final', name: 'outcome', value: 'success'}
+			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Running scripts...'},
+			{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'},
+			{type: 'info', source: 'engine/pdf', name: 'info', value: 'used font: Times New Roman, Regular'},
+			{type: 'data', source: 'engine/pdf', name: 'total-page-count', value: '1'},
+			{type: 'info', source: 'engine/pdf', name: 'progress-percent', value: '100'},
+			{type: 'info', source: 'engine/pdf', name: 'document', value: 'success'}
 		];
 
 		// Utils.log('* logs:', logs);
@@ -268,7 +240,7 @@ describe('Prince.logs()', function() {
 		var stderr = Buffer.from('sta|Loading document...');
 		var logs = Prince.logs(stderr);
 		var expected = [
-			{type: 'status', name: '', value: 'Loading document...'}
+			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Loading document...'}
 		];
 
 		// Utils.log('* logs:', logs);
@@ -283,7 +255,7 @@ describe('Prince.logs()', function() {
 		var stderr = 'sta|Loading document...';
 		var logs = Prince.logs(stderr);
 		var expected = [
-			{type: 'status', name: '', value: 'Loading document...'}
+			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Loading document...'}
 		];
 
 		// Utils.log('* logs:', logs);

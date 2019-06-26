@@ -39,8 +39,9 @@ exports._newLogStatus = function(parts) {
 	Prove('A', arguments);
 
 	return {
-		type: 'status',
-		name: '',
+		type: 'info',
+		source: 'engine/pdf',
+		name: 'status',
 		value: parts[1]
 	};
 };
@@ -59,10 +60,24 @@ exports._newLogMessage = function(parts) {
 	Prove('A', arguments);
 
 	return {
-		type: 'message',
+		type: exports._messageType(parts[1]),
+		source: 'engine/pdf',
 		name: exports._messageName(parts[1]),
 		value: exports._value(parts, 2)
 	};
+};
+
+exports._messageType = function(abbr) {
+
+	Prove('S', arguments);
+
+	switch (abbr) {
+		case 'err': return 'error';
+		case 'wrn': return 'warn';
+		case 'inf': return 'info';
+		case 'dbg': return 'info';
+		case 'out': return 'info';
+	}
 };
 
 exports._messageName = function(abbr) {
@@ -98,8 +113,9 @@ exports._newLogProgress = function(parts) {
 	Prove('A', arguments);
 
 	return {
-		type: 'progress',
-		name: 'percent',
+		type: 'info',
+		source: 'engine/pdf',
+		name: 'progress-percent',
 		value: parts[1]
 	};
 };
@@ -111,6 +127,7 @@ exports._newLogData = function(parts) {
 
 	return {
 		type: 'data',
+		source: 'engine/pdf',
 		name: parts[1],
 		value: exports._value(parts, 2)
 	};
@@ -125,8 +142,9 @@ exports._newLogFinal = function(parts) {
 	Prove('A', arguments);
 
 	return {
-		type: 'final',
-		name: 'outcome',
+		type: 'info',
+		source: 'engine/pdf',
+		name: 'document',
 		value: parts[1]
 	};
 };
