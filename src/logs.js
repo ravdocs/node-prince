@@ -128,7 +128,7 @@ exports._newLogData = function(parts) {
 	var value = exports._value(parts, 2);
 	var parsed;
 
-	// todo: test if value is json and convert to json if possible.
+	// parse data if posssible
 	try {
 		parsed = JSON.parse(value);
 		value = parsed;
