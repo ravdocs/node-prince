@@ -59,11 +59,28 @@ exports._newLogMessage = function(parts) {
 
 	Prove('A', arguments);
 
+	var type = exports._messageType(parts[1]);
+	var name = exports._messageName(parts[1]);
+	var value = exports._value(parts, 2);
+	var vparts = value.split('|');
+
+	// cleanup
+	if (/^loading document: /.test(value)) {
+		name = 'Loading Document';
+		value = value.replace('loading document: ', '');
+	} else if (/^loading license: /.test(value)) {
+		name = 'Loading License';
+		value = value.replace('loading license: ', '');
+	} else if (vparts.length === 2) {
+		name = vparts[1];
+		value = vparts[0];
+	}
+
 	return {
-		type: exports._messageType(parts[1]),
+		type: type,
 		source: 'engine/pdf',
-		name: exports._messageName(parts[1]),
-		value: exports._value(parts, 2)
+		name: name,
+		value: value
 	};
 };
 

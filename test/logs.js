@@ -38,7 +38,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|wrn|http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y');
 		var logs = Prince.logs(stderr);
-		var expected = [{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'}];
+		var expected = [{type: 'warn', source: 'engine/pdf', name: 'unsupported properties: box-shadow, overflow-y', value: 'http://localhost:8080/common.css'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -51,7 +51,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|inf|loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [{type: 'info', source: 'engine/pdf', name: 'info', value: 'loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading Document', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -64,7 +64,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|dbg|loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [{type: 'info', source: 'engine/pdf', name: 'debug', value: 'loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading License', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -155,7 +155,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|wrn||http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y');
 		var logs = Prince.logs(stderr);
-		var expected = [{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'}];
+		var expected = [{type: 'warn', source: 'engine/pdf', name: 'unsupported properties: box-shadow, overflow-y', value: 'http://localhost:8080/common.css'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -168,7 +168,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|inf||loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [{type: 'info', source: 'engine/pdf', name: 'info', value: 'loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading Document', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -181,7 +181,7 @@ describe('Prince.logs()', function() {
 
 		var stderr = Buffer.from('msg|dbg||loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
 		var logs = Prince.logs(stderr);
-		var expected = [{type: 'info', source: 'engine/pdf', name: 'debug', value: 'loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
+		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading License', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
 		// Utils.log('* logs:', logs);
 
@@ -221,7 +221,7 @@ describe('Prince.logs()', function() {
 		var logs = Prince.logs(stderr);
 		var expected = [
 			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Running scripts...'},
-			{type: 'warn', source: 'engine/pdf', name: 'warning', value: 'http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y'},
+			{type: 'warn', source: 'engine/pdf', name: 'unsupported properties: box-shadow, overflow-y', value: 'http://localhost:8080/common.css'},
 			{type: 'info', source: 'engine/pdf', name: 'info', value: 'used font: Times New Roman, Regular'},
 			{type: 'data', source: 'engine/pdf', name: 'total-page-count', value: 1},
 			{type: 'info', source: 'engine/pdf', name: 'progress-percent', value: '100'},
