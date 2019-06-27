@@ -42,7 +42,8 @@ exports._newLogStatus = function(parts) {
 		type: 'info',
 		source: 'engine/pdf',
 		name: 'status',
-		value: parts[1]
+		value: parts[1],
+		created: new Date().toISOString()
 	};
 };
 
@@ -80,7 +81,8 @@ exports._newLogMessage = function(parts) {
 		type: type,
 		source: 'engine/pdf',
 		name: name,
-		value: value
+		value: value,
+		created: new Date().toISOString()
 	};
 };
 
@@ -133,7 +135,8 @@ exports._newLogProgress = function(parts) {
 		type: 'info',
 		source: 'engine/pdf',
 		name: 'progress-percent',
-		value: parts[1]
+		value: parts[1],
+		created: new Date().toISOString()
 	};
 };
 
@@ -157,7 +160,8 @@ exports._newLogData = function(parts) {
 		type: 'data',
 		source: 'engine/pdf',
 		name: parts[1],
-		value: value
+		value: value,
+		created: new Date().toISOString()
 	};
 };
 
@@ -173,7 +177,8 @@ exports._newLogFinal = function(parts) {
 		type: 'info',
 		source: 'engine/pdf',
 		name: 'document',
-		value: parts[1]
+		value: parts[1],
+		created: new Date().toISOString()
 	};
 };
 

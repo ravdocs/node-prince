@@ -4,19 +4,26 @@
 var OS = require('os');
 var Assert = require('@ravdocs/assert');
 var Prince = require('..');
-// var Utils = require('./utils');
+var Utils = require('./utils');
+
+function AssertSame(actual, expected) {
+	Assert.strictEqual('type', actual.type, expected.type);
+	Assert.strictEqual('source', actual.source, expected.source);
+	Assert.strictEqual('name', actual.name, expected.name);
+	Assert.strictEqual('value', actual.value, expected.value);
+}
 
 describe('Prince.logs()', function() {
 
 	it('should parse \'sta|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('sta|Loading document...');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'status', value: 'Loading document...'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -24,12 +31,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'msg|err|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('msg|err|Test error');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'error', source: 'engine/pdf', name: 'error', value: 'Test error'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -37,12 +44,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'msg|wrn|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('msg|wrn|http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'warn', source: 'engine/pdf', name: 'unsupported properties: box-shadow, overflow-y', value: 'http://localhost:8080/common.css'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -50,12 +57,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'msg|inf|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('msg|inf|loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading Document', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -63,12 +70,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'msg|dbg|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('msg|dbg|loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading License', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -76,12 +83,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'msg|out|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('msg|out|Some message from console.log');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'output', value: 'Some message from console.log'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -89,12 +96,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'prg|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('prg|0');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'progress-percent', value: '0'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -102,12 +109,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'dat|...|...\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('dat|key|val');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'data', source: 'engine/pdf', name: 'key', value: 'val'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -115,12 +122,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'fin|success\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('fin|success');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'document', value: 'success'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -128,12 +135,12 @@ describe('Prince.logs()', function() {
 	it('should parse \'fin|failure\' lines correctly', function(done) {
 
 		var stderr = Buffer.from('fin|failure');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'document', value: 'failure'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -141,12 +148,12 @@ describe('Prince.logs()', function() {
 	it('should handle bug where \'msg|err|...\' is formatted as \'msg|err||...\'', function(done) {
 
 		var stderr = Buffer.from('msg|err||Test error');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'error', source: 'engine/pdf', name: 'error', value: 'Test error'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -154,12 +161,12 @@ describe('Prince.logs()', function() {
 	it('should handle bug where \'msg|wrn|...\' is formatted as \'msg|wrn||...\'', function(done) {
 
 		var stderr = Buffer.from('msg|wrn||http://localhost:8080/common.css|unsupported properties: box-shadow, overflow-y');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'warn', source: 'engine/pdf', name: 'unsupported properties: box-shadow, overflow-y', value: 'http://localhost:8080/common.css'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -167,12 +174,12 @@ describe('Prince.logs()', function() {
 	it('should handle bug where \'msg|inf|...\' is formatted as \'msg|inf||...\'', function(done) {
 
 		var stderr = Buffer.from('msg|inf||loading document: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading Document', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -180,12 +187,12 @@ describe('Prince.logs()', function() {
 	it('should handle bug where \'msg|dbg|...\' is formatted as \'msg|dbg||...\'', function(done) {
 
 		var stderr = Buffer.from('msg|dbg||loading license: C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [{type: 'info', source: 'engine/pdf', name: 'Loading License', value: 'C:\\Program Files (x86)\\Prince\\engine\\license\\license.dat'}];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -218,7 +225,7 @@ describe('Prince.logs()', function() {
 		];
 		var stderrStr = stderrLines.join(EOL);
 		var stderr = Buffer.from(stderrStr);
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [
 			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Running scripts...'},
 			{type: 'warn', source: 'engine/pdf', name: 'unsupported properties: box-shadow, overflow-y', value: 'http://localhost:8080/common.css'},
@@ -228,9 +235,11 @@ describe('Prince.logs()', function() {
 			{type: 'info', source: 'engine/pdf', name: 'document', value: 'success'}
 		];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		expected.forEach(function (x, i) {
+			AssertSame(actual[i], expected[i]);
+		});
 
 		done();
 	});
@@ -238,14 +247,14 @@ describe('Prince.logs()', function() {
 	it('should accept stderr as type Buffer', function(done) {
 
 		var stderr = Buffer.from('sta|Loading document...');
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [
 			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Loading document...'}
 		];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -253,14 +262,14 @@ describe('Prince.logs()', function() {
 	it('should accept stderr as type string', function(done) {
 
 		var stderr = 'sta|Loading document...';
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [
 			{type: 'info', source: 'engine/pdf', name: 'status', value: 'Loading document...'}
 		];
 
-		// Utils.log('* logs:', logs);
+		// Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		AssertSame(actual[0], expected[0]);
 
 		done();
 	});
@@ -268,12 +277,12 @@ describe('Prince.logs()', function() {
 	it('should return empty array when stderr is empty', function(done) {
 
 		var stderr;
-		var logs = Prince.logs(stderr);
+		var actual = Prince.logs(stderr);
 		var expected = [];
 
-		// Utils.log('* logs:', logs);
+		Utils.log('* actual:', actual);
 
-		Assert.deepStrictEqual('logs', logs, expected);
+		Assert.deepStrictEqual('logs', actual, expected);
 
 		done();
 	});
