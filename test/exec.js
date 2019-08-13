@@ -24,11 +24,13 @@ describe('Prince.exec()', function() {
 			Assert.deepStrictEqual('stderr', stderr, stderrExpected);
 
 			Assert.isObject('meta', meta);
+			Assert.isString('meta.cmd', meta.cmd);
 			Assert.isNumber('meta.duration', meta.duration);
 			Assert.isNumber('meta.memoryFreeBefore', meta.memoryFreeBefore);
 			Assert.isNumber('meta.memoryFreeAfter', meta.memoryFreeAfter);
 
 			Assert.isNotEmpty('meta', meta);
+			Assert.strictEqual('meta.cmd', meta.cmd, `prince ${__dirname}/fixtures/basic.html --output ${__dirname}/outputs/basic.pdf`);
 			Assert.isGreaterThan('meta.duration', meta.duration, 0);
 			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeBefore', meta.memoryFreeBefore, 0);
 			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeAfter', meta.memoryFreeAfter, 0);
