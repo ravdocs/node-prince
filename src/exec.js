@@ -201,6 +201,10 @@ exports._exec = function(args, options, next) {
 
 				var meta = exports._meta(duration, memoryFreeBefore, memoryFreeAfter);
 
+				if (errExec && errExec.signal === 'SIGTERM') {
+					errExec.message = `${BINARY} timed out: ${errExec.message}`;
+					errExec.timedout = true;
+				}
 				if (errExec) return next(errExec, stdout, stderr, meta);
 
 				// todo: If Prince returns an error status code in this scenario, then
