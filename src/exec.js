@@ -162,7 +162,7 @@ exports._execFileOptions = function(execFileOptions, next) {
 	var MEBIBYTE = 1024 * KIBIBYTE;
 
 	var execFileDefaults = {
-		timeout: 10 * SECOND,
+		timeout: 30 * SECOND,
 		maxBuffer: 10 * MEBIBYTE,
 		encoding: 'buffer'
 	};
