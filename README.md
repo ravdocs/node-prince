@@ -42,6 +42,7 @@ Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around 
 	- **stdout** `<string>` | `<Buffer>`
 	- **stderr** `<string>` | `<Buffer>`
 	- **meta** `<Object>`
+		- **cmd** `<string>` Command executed, including args.
 		- **duration** `<number>` Execution duration, in seconds, of the `prince` command. Uses [process.hrtime.bigint](https://nodejs.org/api/process.html#process_process_hrtime_bigint).
 		- **memoryFreeBefore** `<number>` Amount of system memory free, in MiB, before execution of the `prince` command. If the system does not have the command `free` (e.g., Windows), this value will be 0.
 		- **memoryFreeAfter** `<number>` Amount of system memory free, in MiB, after execution of the `prince` command. If the system does not have the command `free` (e.g., Windows), this value will be 0.
@@ -56,6 +57,7 @@ Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr, m
 
 	if (stdout.length) console.log('stdout:', stdout.toString());
 	if (stderr.length) console.log('stderr:', stderr.toString());
+	console.log('meta.cmd:', meta.cmd);
 	console.log('meta.duration:', meta.duration);
 	console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
 	console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
@@ -84,6 +86,7 @@ Prince.exec('test.html', 'test.pdf', princeOptions, execOptions, function(err, s
 
 	if (stdout.length) console.log('stdout:', stdout.toString());
 	if (stderr.length) console.log('stderr:', stderr.toString());
+	console.log('meta.cmd:', meta.cmd);
 	console.log('meta.duration:', meta.duration);
 	console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
 	console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
@@ -104,6 +107,7 @@ app.get('/', function(req, res) {
 	Prince.exec('test.html', '-', null, null, function(err, stdout, stderr, meta) {
 		if (err) return res.status(500).send(stderr);
 
+		console.log('meta.cmd:', meta.cmd);
 		console.log('meta.duration:', meta.duration);
 		console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
 		console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
