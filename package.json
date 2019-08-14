@@ -1,6 +1,6 @@
 {
   "name": "@ravdocs/princexml",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "description": "Node API for executing XML/HTML to PDF renderer PrinceXML via prince(1) CLI",
   "keywords": [
     "API",
