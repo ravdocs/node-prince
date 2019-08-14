@@ -200,11 +200,9 @@ exports._exec = function(args, options, next) {
 				if (errMem) memoryFreeAfter = 0; // do not stop if memory cannot be measured
 
 				var meta = exports._meta(args, duration, memoryFreeBefore, memoryFreeAfter);
+				stderr = exports._stderr(stderr, errExec, options.encoding);
+				errExec = exports._errExec(errExec);
 
-				if (errExec && errExec.signal === 'SIGTERM') {
-					errExec.message = `${BINARY} timed out: ${errExec.message}`;
-					errExec.timedout = true;
-				}
 				if (errExec) return next(errExec, stdout, stderr, meta);
 
 				// todo: If Prince returns an error status code in this scenario, then
@@ -233,6 +231,40 @@ exports._meta = function(args, duration, memoryFreeBefore, memoryFreeAfter) {
 	};
 
 	return meta;
+};
+
+// If command timed out, i.e., errExec but no stderr, populate stderr with
+// errExec.message.
+exports._stderr = function(stderr, errExec, encoding) {
+
+	Prove('*eS', arguments);
+
+	// return early
+	if (!errExec) return stderr;
+	var timedout = (!stderr.toString().length);
+	if (timedout) return stderr;
+
+	return (encoding === 'buffer')
+		? Buffer.from(errExec.message)
+		: Buffer.from(errExec.message).toString(encoding);
+};
+
+// If command timed out, i.e., errExec.signal is SIGTERM, say so in the error
+// message.
+exports._errExec = function(errExec) {
+
+	Prove('e', arguments);
+
+	// return early
+	if (!errExec) return null;
+
+	var timedout = (errExec.signal === 'SIGTERM');
+	if (timedout) {
+		errExec.message = `${BINARY} timed out: ${errExec.message}`;
+		errExec.timedout = true;
+	}
+
+	return errExec;
 };
 
 exports._secondsSince = function(min) {
