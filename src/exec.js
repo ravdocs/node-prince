@@ -234,7 +234,7 @@ exports._meta = function(args, duration, memoryFreeBefore, memoryFreeAfter) {
 };
 
 // If command timed out, i.e., errExec but no stderr, populate stderr with
-// errExec.message.
+// an error message.
 exports._stderr = function(stderr, errExec, encoding) {
 
 	Prove('*eS', arguments);
@@ -244,9 +244,11 @@ exports._stderr = function(stderr, errExec, encoding) {
 	var timedout = (!stderr.toString().length);
 	if (!timedout) return stderr;
 
+	var msg = `msg|err|${BINARY} timed out`;
+
 	return (encoding === 'buffer')
-		? Buffer.from(errExec.message)
-		: Buffer.from(errExec.message).toString(encoding);
+		? Buffer.from(msg)
+		: Buffer.from(msg).toString(encoding);
 };
 
 // If command timed out, i.e., errExec.signal is SIGTERM, say so in the error
