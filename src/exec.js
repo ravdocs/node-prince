@@ -242,7 +242,7 @@ exports._stderr = function(stderr, errExec, encoding) {
 	// return early
 	if (!errExec) return stderr;
 	var timedout = (!stderr.toString().length);
-	if (timedout) return stderr;
+	if (!timedout) return stderr;
 
 	return (encoding === 'buffer')
 		? Buffer.from(errExec.message)
