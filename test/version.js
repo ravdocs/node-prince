@@ -4,21 +4,25 @@
 var Assert = require('@ravdocs/assert');
 var Prince = require('..');
 // var Utils = require('./utils');
+var Pkg = require('../package.json');
 
 describe('Prince.version()', function() {
 
-	it('should return version information', function(done) {
+	it('should return package version and may include prince version immediately', function(done) {
+		var actual = Prince.version();
+		var expected = `${Pkg.name} ${Pkg.version}`;
+		var startsWith = actual.indexOf(expected) === 0;
+		Assert.strictEqual('version', startsWith, true);
+		done();
+	});
 
-		Prince.version(function(err, info) {
-			if (err) return done(err);
+	it('should return package version with prince version shortly later', function(done) {
 
-			// Utils.log('* info:', info);
-
-			Assert.isString('info', info);
-
-			Assert.isNotEmpty('info', info);
-
+		setTimeout(function() {
+			var actual = Prince.version();
+			var expected = `${Pkg.name} ${Pkg.version} (Prince 12.5)`;
+			Assert.deepStrictEqual('version', actual, expected);
 			done();
-		});
+		}, 100);
 	});
 });

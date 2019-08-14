@@ -117,22 +117,15 @@ app.listen(3000);
 
 ## Prince.version()
 
-Returns version information about this NPM module and the PrinceXML software installed.
-
-- **callback** `<Function>`
-	- **err** `<Error>`
-	- **info** `<string>`
+Returns version information about this NPM module and the PrinceXML software installed. If you call Prince.version() within the first 100 ms than you will get just the package verison. However, a short time (~100 ms) the returned string will also include the version.
 
 Example:
 
 ```js
 var Prince = require('@ravdocs/princexml');
 
-Prince.version(function(err, info) {
-	if (err) throw err;
-
-	console.log(info);
-});
+var version = Prince.version();
+console.log('version', version);
 ```
 
 Output:
