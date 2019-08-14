@@ -162,7 +162,7 @@ exports._execFileOptions = function(execFileOptions, next) {
 	var MEBIBYTE = 1024 * KIBIBYTE;
 
 	var execFileDefaults = {
-		timeout: 10 * SECOND,
+		timeout: 30 * SECOND,
 		maxBuffer: 10 * MEBIBYTE,
 		encoding: 'buffer'
 	};
@@ -199,8 +199,12 @@ exports._exec = function(args, options, next) {
 			exports._memoryFree(function(errMem, memoryFreeAfter) {
 				if (errMem) memoryFreeAfter = 0; // do not stop if memory cannot be measured
 
-				var meta = exports._meta(duration, memoryFreeBefore, memoryFreeAfter);
+				var meta = exports._meta(args, duration, memoryFreeBefore, memoryFreeAfter);
 
+				if (errExec && errExec.signal === 'SIGTERM') {
+					errExec.message = `${BINARY} timed out: ${errExec.message}`;
+					errExec.timedout = true;
+				}
 				if (errExec) return next(errExec, stdout, stderr, meta);
 
 				// todo: If Prince returns an error status code in this scenario, then
@@ -214,11 +218,15 @@ exports._exec = function(args, options, next) {
 	});
 };
 
-exports._meta = function(duration, memoryFreeBefore, memoryFreeAfter) {
+exports._meta = function(args, duration, memoryFreeBefore, memoryFreeAfter) {
 
-	Prove('*NN', arguments);
+	Prove('A*NN', arguments);
+
+	var argsStr = args.join(' ');
+	var cmd = (argsStr) ? `${BINARY} ${argsStr}` : BINARY;
 
 	var meta = {
+		cmd: cmd,
 		duration: duration,
 		memoryFreeBefore: memoryFreeBefore,
 		memoryFreeAfter: memoryFreeAfter
