@@ -2,8 +2,9 @@
 'use strict';
 
 var Assert = require('@ravdocs/assert');
-var Prince = require('..');
+var Prince = require('../..');
 // var Utils = require('./utils');
+var dir = __dirname + '/..';
 
 describe('Prince.exec()', function() {
 
@@ -13,7 +14,7 @@ describe('Prince.exec()', function() {
 		var stdoutExpected = Buffer.from('');
 		var stderrExpected = Buffer.from('');
 
-		Prince.exec(`${__dirname}/fixtures/basic.html`, `${__dirname}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
+		Prince.exec(`${dir}/fixtures/basic.html`, `${dir}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
 			if (err) return done(err);
 
 			// Utils.log('* stdout:', stdout.toString());
@@ -30,7 +31,7 @@ describe('Prince.exec()', function() {
 			Assert.isNumber('meta.memoryFreeAfter', meta.memoryFreeAfter);
 
 			Assert.isNotEmpty('meta', meta);
-			Assert.strictEqual('meta.cmd', meta.cmd, `prince ${__dirname}/fixtures/basic.html --output ${__dirname}/outputs/basic.pdf`);
+			Assert.strictEqual('meta.cmd', meta.cmd, `prince ${dir}/fixtures/basic.html --output ${dir}/outputs/basic.pdf`);
 			Assert.isGreaterThan('meta.duration', meta.duration, 0);
 			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeBefore', meta.memoryFreeBefore, 0);
 			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeAfter', meta.memoryFreeAfter, 0);
@@ -41,7 +42,26 @@ describe('Prince.exec()', function() {
 
 	it('should return pdf to stdout when output is \'-\'', function(done) {
 
-		Prince.exec(`${__dirname}/fixtures/basic.html`, '-', null, null, function(err, stdout) {
+		Prince.exec(`${dir}/fixtures/basic.html`, '-', null, null, function(err, stdout) {
+			if (err) return done(err);
+
+			// Utils.log('* stdout:', stdout.toString());
+
+			Assert.isBuffer('stdout', stdout);
+			// Assert.strictEqual('stdout.length', stdout.length, 30544);
+
+			done();
+		});
+	});
+
+	it('should not throw an error with javascript set to false', function(done) {
+
+		var princeOptions = {
+			javascript: false
+		};
+		var execOptions = {};
+
+		Prince.exec(`${dir}/fixtures/basic.html`, '-', princeOptions, execOptions, function(err, stdout) {
 			if (err) return done(err);
 
 			// Utils.log('* stdout:', stdout.toString());

@@ -100,6 +100,14 @@ var BINARY = 'prince';
 // 	'license-file': true
 // };
 
+function prunePrinceOptions(options) {
+
+	// prince will throw an error when javascript is set to false
+	// prince: false: error: can't open input file: No such file or directory
+	if (options.javascript === false) delete options.javascript;
+	return options;
+}
+
 module.exports = function(inputs, output, princeOptions, execFileOptions, next) {
 
 	Prove('*sooF', arguments);
@@ -108,6 +116,7 @@ module.exports = function(inputs, output, princeOptions, execFileOptions, next) 
 	if (!Array.isArray(inputs)) inputs = [inputs];
 	if (!princeOptions) princeOptions = {};
 	if (!execFileOptions) execFileOptions = {};
+	princeOptions = prunePrinceOptions(princeOptions);
 
 	exports._args(inputs, output, princeOptions, function(err, args) {
 		if (err) return next(err);

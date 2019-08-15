@@ -2,9 +2,8 @@
 'use strict';
 
 var Assert = require('@ravdocs/assert');
-var Prince = require('..');
-// var Utils = require('./utils');
-var Pkg = require('../package.json');
+var Prince = require('../..');
+var Pkg = require('../../package.json');
 
 describe('Prince.version()', function() {
 
