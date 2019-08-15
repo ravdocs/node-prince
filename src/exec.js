@@ -116,7 +116,6 @@ module.exports = function(inputs, output, princeOptions, execFileOptions, next) 
 	if (!Array.isArray(inputs)) inputs = [inputs];
 	if (!princeOptions) princeOptions = {};
 	if (!execFileOptions) execFileOptions = {};
-	princeOptions = prunePrinceOptions(princeOptions);
 
 	exports._args(inputs, output, princeOptions, function(err, args) {
 		if (err) return next(err);
@@ -142,6 +141,9 @@ exports._args = function(inputs, output, princeOptions, next) {
 	Prove('AsOF', arguments);
 
 	var args = [];
+
+	// prince does not like javascript = false
+	princeOptions = prunePrinceOptions(princeOptions);
 
 	_.forOwn(princeOptions, function(value, name) {
 		var isFlag = (value === true);

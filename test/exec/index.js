@@ -41,34 +41,19 @@ describe('Prince.exec()', function() {
 	});
 
 	it('should return pdf to stdout when output is \'-\'', function(done) {
-
 		Prince.exec(`${dir}/fixtures/basic.html`, '-', null, null, function(err, stdout) {
 			if (err) return done(err);
-
-			// Utils.log('* stdout:', stdout.toString());
-
 			Assert.isBuffer('stdout', stdout);
-			// Assert.strictEqual('stdout.length', stdout.length, 30544);
-
 			done();
 		});
 	});
 
 	it('should not throw an error with javascript set to false', function(done) {
-
-		var princeOptions = {
-			javascript: false
-		};
 		var execOptions = {};
-
+		var princeOptions = {javascript: false};
 		Prince.exec(`${dir}/fixtures/basic.html`, '-', princeOptions, execOptions, function(err, stdout) {
 			if (err) return done(err);
-
-			// Utils.log('* stdout:', stdout.toString());
-
 			Assert.isBuffer('stdout', stdout);
-			// Assert.strictEqual('stdout.length', stdout.length, 30544);
-
 			done();
 		});
 	});
