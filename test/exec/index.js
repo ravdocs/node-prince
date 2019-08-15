@@ -1,6 +1,5 @@
 /* eslint-env mocha */
 'use strict';
-
 var Assert = require('@ravdocs/assert');
 var Prince = require('../..');
 // var Utils = require('./utils');

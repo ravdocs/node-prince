@@ -204,6 +204,7 @@ exports._exec = function(args, options, next) {
 		var min = process.hrtime.bigint();
 
 		ChildProcess.execFile(BINARY, args, options, function(errExec, stdout, stderr) {
+			// handle error below - do not stop on errExec
 
 			var duration = exports._secondsSince(min);
 
