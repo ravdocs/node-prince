@@ -26,7 +26,7 @@ function memory(next) {
 
 function toCommand(args) {
 	var arr = args.map(function (arg) {
-		if (!arg) return arg;
+		if (!arg || !arg.indexOf) return arg;
 		var isOptionOrBuffer = arg.indexOf('-') === 0;
 		if (!isOptionOrBuffer) arg = `'${arg}'`;
 		return arg;
