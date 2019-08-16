@@ -11,16 +11,13 @@ describe('Prince.exec()', function() {
 
 	it('should return data in correct format', function(done) {
 
-		var isWindows = (process.platform === 'win32');
 		var stdoutExpected = Buffer.from('');
 		var stderrExpected = Buffer.from('');
+		var pathIn = (`${dir}/fixtures/basic.html`).replace(/\\/g, '/');
+		var pathOut = (`${dir}/outputs/basic.pdf`).replace(/\\/g, '/');
 
-		Prince.exec(`${dir}/fixtures/basic.html`, `${dir}/outputs/basic.pdf`, null, null, function(err, stdout, stderr, meta) {
+		Prince.exec(pathIn, pathOut, null, null, function(err, stdout, stderr, meta) {
 			if (err) return done(err);
-
-			// Utils.log('* stdout:', stdout.toString());
-			// Utils.log('* stderr:', stderr.toString());
-			// Utils.log('* meta:', meta);
 
 			Assert.deepStrictEqual('stdout', stdout, stdoutExpected);
 			Assert.deepStrictEqual('stderr', stderr, stderrExpected);
@@ -28,14 +25,18 @@ describe('Prince.exec()', function() {
 			Assert.isObject('meta', meta);
 			Assert.isString('meta.cmd', meta.cmd);
 			Assert.isNumber('meta.duration', meta.duration);
-			Assert.isNumber('meta.memoryFreeBefore', meta.memoryFreeBefore);
-			Assert.isNumber('meta.memoryFreeAfter', meta.memoryFreeAfter);
+			Assert.isObject('meta.memory', meta.memory);
+			Assert.isObject('meta.memory.before', meta.memory.before);
+			Assert.isObject('meta.memory.after', meta.memory.after);
 
-			Assert.isNotEmpty('meta', meta);
-			Assert.strictEqual('meta.cmd', meta.cmd, `prince ${dir}/fixtures/basic.html --output ${dir}/outputs/basic.pdf`);
+			// on linux we care more about "available" memory than "free" memory
+			Assert.isNumber('meta.memory.before.available', meta.memory.before.available);
+			Assert.isNumber('meta.memory.after.available', meta.memory.after.available);
+
+			var cmd = (`prince '${pathIn}' --output '${pathOut}'`);
+
+			Assert.strictEqual('meta.cmd', meta.cmd, cmd);
 			Assert.isGreaterThan('meta.duration', meta.duration, 0);
-			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeBefore', meta.memoryFreeBefore, 0);
-			if (!isWindows) Assert.isGreaterThan('meta.memoryFreeAfter', meta.memoryFreeAfter, 0);
 
 			done();
 		});
