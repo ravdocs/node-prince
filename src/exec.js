@@ -3,11 +3,12 @@
 var Prove = require('provejs-params');
 var ChildProcess = require('child_process');
 var Which = require('which');
-var Free = require('free-memory');
-var _ = {};
-_.forOwn = require('lodash.forown');
+var SI = require('systeminformation');
+var ForOwn = require('lodash.forown');
+var Stopwatch = require('./stopwatch');
 
-var BINARY = 'prince';
+var installed = false;
+var command = 'prince';
 
 // // the officially support options of prince(1)
 // var PRINCE_OPTIONS = {
@@ -108,35 +109,66 @@ function prunePrinceOptions(options) {
 	return options;
 }
 
-module.exports = function(inputs, output, princeOptions, execFileOptions, next) {
+function memory(next) {
+	SI.mem().then(function (mem) {
+		next(null, mem);
+	}).catch(next);
+}
 
-	Prove('*sooF', arguments);
+function toMeta(args, duration, mem1, mem2) {
 
-	if (!inputs) inputs = [];
-	if (!Array.isArray(inputs)) inputs = [inputs];
-	if (!princeOptions) princeOptions = {};
-	if (!execFileOptions) execFileOptions = {};
+	Prove('A*OO', arguments);
 
-	exports._args(inputs, output, princeOptions, function(err, args) {
-		if (err) return next(err);
+	var argsStr = args.join(' ');
+	var cmd = (argsStr) ? `${command} ${argsStr}` : command;
 
-		exports._execFileOptions(execFileOptions, function(err, execFileOptions) {
-			if (err) return next(err);
+	var meta = {
+		cmd: cmd,
+		duration: duration,
+		memoryFreeBefore: mem1.free,
+		memoryFreeAfter: mem2.free
+	};
 
-			exports._verifyInstalled(function(err) {
-				if (err) return next(err);
+	return meta;
+}
 
-				exports._exec(args, execFileOptions, function(err, stdout, stderr, meta) {
-					if (err) return next(err, stdout, stderr, meta);
+// If command timed out, i.e., errExec but no stderr, populate stderr with
+// an error message.
+function toStdErr(stderr, errExec, encoding) {
 
-					next(null, stdout, stderr, meta);
-				});
-			});
-		});
-	});
-};
+	Prove('*eS', arguments);
 
-exports._args = function(inputs, output, princeOptions, next) {
+	// return early
+	if (!errExec) return stderr;
+	var timedout = (!stderr.toString().length);
+	if (!timedout) return stderr;
+
+	var msg = `msg|err|${command} timed out`;
+
+	return (encoding === 'buffer')
+		? Buffer.from(msg)
+		: Buffer.from(msg).toString(encoding);
+}
+
+// If command timed out, i.e., errExec.signal is SIGTERM, say so in the error
+// message.
+function toErrExec(errExec) {
+
+	Prove('e', arguments);
+
+	// return early
+	if (!errExec) return null;
+
+	var timedout = (errExec.signal === 'SIGTERM');
+	if (timedout) {
+		errExec.message = `${command} timed out: ${errExec.message}`;
+		errExec.timedout = true;
+	}
+
+	return errExec;
+}
+
+function composeArgs(inputs, output, princeOptions, next) {
 
 	Prove('AsOF', arguments);
 
@@ -145,7 +177,7 @@ exports._args = function(inputs, output, princeOptions, next) {
 	// prince does not like javascript = false
 	princeOptions = prunePrinceOptions(princeOptions);
 
-	_.forOwn(princeOptions, function(value, name) {
+	ForOwn(princeOptions, function(value, name) {
 		var isFlag = (value === true);
 
 		args.push(`--${name}`);
@@ -158,64 +190,57 @@ exports._args = function(inputs, output, princeOptions, next) {
 	args.push('--output');
 	args.push(output);
 
-	next(null, args);
-};
+	process.nextTick(next, null, args);
+}
 
-exports._execFileOptions = function(execFileOptions, next) {
+function applyDefaults(options, next) {
 
 	Prove('OF', arguments);
-
-	var MILLISECOND = 1;
-	var SECOND = 1000 * MILLISECOND;
-
-	var BYTE = 1;
-	var KIBIBYTE = 1024 * BYTE;
-	var MEBIBYTE = 1024 * KIBIBYTE;
-
-	var execFileDefaults = {
-		timeout: 30 * SECOND,
-		maxBuffer: 10 * MEBIBYTE,
+	var defaults = {
+		timeout: 30 * 1000, // millseconds
+		maxBuffer: 10 * 1024 * 1024, // megabyte
 		encoding: 'buffer'
 	};
+	options = Object.assign({}, defaults, options);
+	process.nextTick(next, null, options);
+}
 
-	execFileOptions = Object.assign({}, execFileDefaults, execFileOptions);
-
-	next(null, execFileOptions);
-};
-
-exports._verifyInstalled = function(next) {
-
+function verifyInstall(next) {
 	Prove('F', arguments);
-
-	Which(BINARY, function(err) {
-		if (err) return next(new Error(`Cannot find "${BINARY}" binary. Verify that "${BINARY}" is installed and is in the PATH.`));
-
+	Which(command, function(err) {
+		if (err) return next(new Error(`Cannot find "${command}" binary. Verify that "${command}" is installed and is in the PATH.`));
+		installed = true;
 		next();
 	});
-};
+}
 
-exports._exec = function(args, options, next) {
+function noopInstall(next) {
+	process.nextTick(next);
+}
+
+function execute(args, options, next) {
 
 	Prove('AOF', arguments);
 
-	exports._memoryFree(function(err, memoryFreeBefore) {
-		if (err) memoryFreeBefore = 0; // do not stop if memory cannot be measured
+	memory(function(err, mem1) {
+		if (err) return next(err);
 
-		var min = process.hrtime.bigint();
+		var stopwatch = new Stopwatch();
 
-		ChildProcess.execFile(BINARY, args, options, function(errExec, stdout, stderr) {
+		ChildProcess.execFile(command, args, options, function(errExec, stdout, stderr) {
 			// handle error below - do not stop on errExec
 
-			var duration = exports._secondsSince(min);
+			var duration = stopwatch.stop(true);
 
-			exports._memoryFree(function(errMem, memoryFreeAfter) {
-				if (errMem) memoryFreeAfter = 0; // do not stop if memory cannot be measured
+			memory(function(err, mem2) {
+				if (err) return next(err);
 
-				var meta = exports._meta(args, duration, memoryFreeBefore, memoryFreeAfter);
-				stderr = exports._stderr(stderr, errExec, options.encoding);
-				errExec = exports._errExec(errExec);
+				var meta = toMeta(args, duration, mem1, mem2);
+				var stderr2 = toStdErr(stderr, errExec, options.encoding);
+				var errExec2 = toErrExec(errExec);
 
-				if (errExec) return next(errExec, stdout, stderr, meta);
+				// return early
+				if (errExec2) return next(errExec2, stdout, stderr2, meta);
 
 				// todo: If Prince returns an error status code in this scenario, then
 				// this condition will never be true, making this code unnecessary.
@@ -226,110 +251,33 @@ exports._exec = function(args, options, next) {
 			});
 		});
 	});
-};
+}
 
-exports._meta = function(args, duration, memoryFreeBefore, memoryFreeAfter) {
+module.exports = function(inputs, output, princeOptions, execFileOptions, next) {
 
-	Prove('A*NN', arguments);
+	Prove('*sooF', arguments);
 
-	var argsStr = args.join(' ');
-	var cmd = (argsStr) ? `${BINARY} ${argsStr}` : BINARY;
+	if (!inputs) inputs = [];
+	if (!Array.isArray(inputs)) inputs = [inputs];
+	if (!princeOptions) princeOptions = {};
+	if (!execFileOptions) execFileOptions = {};
+	var checkInstall = (installed)? noopInstall : verifyInstall;
 
-	var meta = {
-		cmd: cmd,
-		duration: duration,
-		memoryFreeBefore: memoryFreeBefore,
-		memoryFreeAfter: memoryFreeAfter
-	};
-
-	return meta;
-};
-
-// If command timed out, i.e., errExec but no stderr, populate stderr with
-// an error message.
-exports._stderr = function(stderr, errExec, encoding) {
-
-	Prove('*eS', arguments);
-
-	// return early
-	if (!errExec) return stderr;
-	var timedout = (!stderr.toString().length);
-	if (!timedout) return stderr;
-
-	var msg = `msg|err|${BINARY} timed out`;
-
-	return (encoding === 'buffer')
-		? Buffer.from(msg)
-		: Buffer.from(msg).toString(encoding);
-};
-
-// If command timed out, i.e., errExec.signal is SIGTERM, say so in the error
-// message.
-exports._errExec = function(errExec) {
-
-	Prove('e', arguments);
-
-	// return early
-	if (!errExec) return null;
-
-	var timedout = (errExec.signal === 'SIGTERM');
-	if (timedout) {
-		errExec.message = `${BINARY} timed out: ${errExec.message}`;
-		errExec.timedout = true;
-	}
-
-	return errExec;
-};
-
-exports._secondsSince = function(min) {
-
-	Prove('*', arguments);
-
-	var max = process.hrtime.bigint();
-
-	var NANOSECOND = 1;
-	var MICROSECOND = NANOSECOND * 1000;
-	var MILLISECOND = MICROSECOND * 1000;
-	var SECOND = MILLISECOND * 1000;
-
-	var elapsedBigInt = max - min;
-	var elapsedNanoseconds = Number(elapsedBigInt);
-	var elapsedSeconds = elapsedNanoseconds / SECOND;
-
-	return elapsedSeconds;
-};
-
-exports._memoryFree = function(next) {
-
-	Prove('F', arguments);
-
-	switch (process.platform) {
-		case 'win32': return exports._memoryFreeWindows(next);
-		default: return exports._memoryFreeUnix(next);
-	}
-};
-
-exports._memoryFreeWindows = function(next) {
-
-	Prove('F', arguments);
-
-	// Windows is not supported currently.
-	next(null, 0);
-};
-
-exports._memoryFreeUnix = function(next) {
-
-	Prove('F', arguments);
-
-	var KIBIBYTE = 1;
-	var MEBIBYTE = 1024 * KIBIBYTE;
-
-	Free(function(err, info) {
+	composeArgs(inputs, output, princeOptions, function(err, args) {
 		if (err) return next(err);
 
-		var free = info.mem.free;
-		var freeMib = free / MEBIBYTE;
+		applyDefaults(execFileOptions, function(err, execFileOptions) {
+			if (err) return next(err);
 
-		next(null, freeMib);
+			checkInstall(function(err) {
+				if (err) return next(err);
+
+				execute(args, execFileOptions, function(err, stdout, stderr, meta) {
+					if (err) return next(err, stdout, stderr, meta);
+
+					next(null, stdout, stderr, meta);
+				});
+			});
+		});
 	});
 };
