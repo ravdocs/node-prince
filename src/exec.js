@@ -119,9 +119,12 @@ function applyDefaults(options, next) {
 
 	Prove('OF', arguments);
 	var defaults = {
-		timeout: 30 * 1000, // millseconds
-		maxBuffer: 10 * 1024 * 1024, // megabyte
-		encoding: 'buffer'
+		'timeout': 30 * 1000, // millseconds
+		'maxBuffer': 10 * 1024 * 1024, // megabyte
+		'encoding': 'buffer',
+		'profile': 'PDF/A-3b', //<--- eMortgage Standard
+		'structured-log': 'buffered', // avoid deadlocks
+		'http-timeout': 10 // only load from our servers so 10 seconds is a long time
 	};
 	options = Object.assign({}, defaults, options);
 	process.nextTick(next, null, options);
