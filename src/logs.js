@@ -2,39 +2,24 @@
 
 var Prove = require('provejs-params');
 
-module.exports = function(stderr) {
-
-	Prove('*', arguments);
-
-	if (Buffer.isBuffer(stderr)) stderr = stderr.toString();
-	if (typeof stderr !== 'string') return [];
-
-	stderr = stderr.replace(/^msg\|((err)|(wrn)|(inf)|(dbg))\|\|/mg, 'msg|$1|'); // workaround for current bug where message is 'msg|...||...' instead of 'msg|...|...'
-	var lines = stderr.split(/\r?\n/);
-	var logs = lines.map(exports._newLog);
-	logs = exports._compact(logs); // remove any null logs, i.e., lines which were not parsable
-
-	return logs;
-};
-
-exports._newLog = function(line) {
+function parseLine(line) {
 
 	Prove('SNA', arguments);
 
 	var parts = line.split('|');
 
 	switch (parts[0]) {
-		case 'sta': return exports._newLogStatus(parts);
-		case 'msg': return exports._newLogMessage(parts);
-		case 'prg': return exports._newLogProgress(parts);
-		case 'dat': return exports._newLogData(parts);
-		case 'fin': return exports._newLogFinal(parts);
+		case 'sta': return toLogStatus(parts);
+		case 'msg': return toLogMessage(parts);
+		case 'prg': return toLogProgress(parts);
+		case 'dat': return toLogData(parts);
+		case 'fin': return toLogFinal(parts);
 		default: return null;
 	}
-};
+}
 
 // 'sta|...' is a status message.
-exports._newLogStatus = function(parts) {
+function toLogStatus(parts) {
 
 	Prove('A', arguments);
 
@@ -45,7 +30,7 @@ exports._newLogStatus = function(parts) {
 		value: parts[1],
 		created: new Date().toISOString()
 	};
-};
+}
 
 // 'msg|...|...' is a message.
 // It is one of the following:
@@ -56,20 +41,23 @@ exports._newLogStatus = function(parts) {
 // - 'msg|out|...': console output from `console.log()`
 // Note: Currently (Prince 12), 'msg|err|...', 'msg|wrn|...', 'msg|inf|...',
 // and 'msg|dbg|...' are formatted incorrectly as 'msg|...||...'.
-exports._newLogMessage = function(parts) {
+function toLogMessage(parts) {
 
 	Prove('A', arguments);
 
-	var type = exports._messageType(parts[1]);
-	var name = exports._messageName(parts[1]);
-	var value = exports._value(parts, 2);
+	var type = getMessageType(parts[1]);
+	var name = getMessageName(parts[1]);
+	var value = getValue(parts, 2);
 	var vparts = value.split('|');
 
+	var isLoadDoc = /^loading document: /.test(value);
+	var isLoadLic = /^loading license: /.test(value);
+
 	// cleanup
-	if (/^loading document: /.test(value)) {
+	if (isLoadDoc) {
 		name = 'Loading Document';
 		value = value.replace('loading document: ', '');
-	} else if (/^loading license: /.test(value)) {
+	} else if (isLoadLic) {
 		name = 'Loading License';
 		value = value.replace('loading license: ', '');
 	} else if (vparts.length === 2) {
@@ -84,9 +72,9 @@ exports._newLogMessage = function(parts) {
 		value: value,
 		created: new Date().toISOString()
 	};
-};
+}
 
-exports._messageType = function(abbr) {
+function getMessageType(abbr) {
 
 	Prove('S', arguments);
 
@@ -97,9 +85,9 @@ exports._messageType = function(abbr) {
 		case 'dbg': return 'info';
 		case 'out': return 'info';
 	}
-};
+}
 
-exports._messageName = function(abbr) {
+function getMessageName(abbr) {
 
 	Prove('S', arguments);
 
@@ -110,24 +98,22 @@ exports._messageName = function(abbr) {
 		case 'dbg': return 'debug';
 		case 'out': return 'output';
 	}
-};
+}
 
 // The parts are a line split by '|'.
 // Usually, the value will be the last part.
 // However, the value may have had one or more '|' in it, and, if so, the
 // value will have been split into multiple parts. In this case, they must
 // be rejoined by '|'.
-exports._value = function(parts, i) {
-
+function getValue(parts, i) {
 	Prove('AN', arguments);
-
 	return parts.slice(i).join('|');
-};
+}
 
 // 'prg|...' is a progress percentage.
 // It is in the format 'prg|{{percent}}', where '{{percent}}' is 0, 100, or any
 // number in between.
-exports._newLogProgress = function(parts) {
+function toLogProgress(parts) {
 
 	Prove('A', arguments);
 
@@ -138,14 +124,14 @@ exports._newLogProgress = function(parts) {
 		value: parts[1],
 		created: new Date().toISOString()
 	};
-};
+}
 
 // 'dat|name|value' is a data message produced by `Log.data("name", "value")`.
-exports._newLogData = function(parts) {
+function toLogData(parts) {
 
 	Prove('A', arguments);
 
-	var value = exports._value(parts, 2);
+	var value = getValue(parts, 2);
 	var parsed;
 
 	// parse data if posssible
@@ -163,13 +149,13 @@ exports._newLogData = function(parts) {
 		value: value,
 		created: new Date().toISOString()
 	};
-};
+}
 
 // 'fin|...' is the final outcome.
 // It is one of the following:
 // - 'fin|success'
 // - 'fin|failure'
-exports._newLogFinal = function(parts) {
+function toLogFinal(parts) {
 
 	Prove('A', arguments);
 
@@ -180,13 +166,36 @@ exports._newLogFinal = function(parts) {
 		value: parts[1],
 		created: new Date().toISOString()
 	};
-};
+}
 
-exports._compact = function(arr) {
-
+// remove any null logs, i.e., lines which were not parsable
+function compact(arr) {
 	Prove('A', arguments);
-
 	return arr.filter(function(val) {
 		return (!!val);
 	});
+}
+
+
+function bugWorkaround(stderr) {
+	// workaround for current bug where message is 'msg|...||...' instead of 'msg|...|...'
+	stderr = stderr.replace(/^msg\|((err)|(wrn)|(inf)|(dbg))\|\|/mg, 'msg|$1|');
+	return stderr;
+}
+
+module.exports = function(stderr) {
+
+	Prove('*', arguments);
+
+	var lines, logs;
+
+	if (Buffer.isBuffer(stderr)) stderr = stderr.toString();
+	if (typeof stderr !== 'string') return [];
+
+	stderr = bugWorkaround(stderr);
+	lines = stderr.split(/\r?\n/);
+	logs = lines.map(parseLine);
+	logs = compact(logs);
+
+	return logs;
 };
