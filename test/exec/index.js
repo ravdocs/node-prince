@@ -4,10 +4,11 @@
 
 var Assert = require('@ravdocs/assert');
 var Prince = require('../..');
-// var Utils = require('./utils');
+var Fixtures = require('../fixtures');
 var dir = __dirname + '/..';
 
 describe('Prince.exec()', function() {
+	this.timeout(10000);
 
 	it('should return data in correct format', function(done) {
 
@@ -59,6 +60,19 @@ describe('Prince.exec()', function() {
 		var options = {javascript: false};
 		Prince.exec(`${dir}/fixtures/basic.html`, '-', options, function(err, stdout) {
 			if (err) return done(err);
+			Assert.isBuffer('stdout', stdout);
+			done();
+		});
+	});
+
+
+	it('should not throw an error with 500 pages', function(done) {
+
+		var options = {};
+		var output = '-';
+		var input = Fixtures.toHtml({pages: 500});
+		Prince.exec(input, output, options, function(err, stdout) {
+			if (err) throw err;
 			Assert.isBuffer('stdout', stdout);
 			done();
 		});
