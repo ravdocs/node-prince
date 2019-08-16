@@ -30,6 +30,7 @@ describe('Prince.exec()', function() {
 			Assert.isObject('meta.memory.after', meta.memory.after);
 
 			// on linux we care more about "available" memory than "free" memory
+			// https://www.linuxatemyram.com/
 			Assert.isNumber('meta.memory.before.available', meta.memory.before.available);
 			Assert.isNumber('meta.memory.after.available', meta.memory.after.available);
 
