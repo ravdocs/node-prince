@@ -35,8 +35,7 @@ Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around 
 
 - **inputs** `<string>` | `<string[]>` (*required*) Input file or files (XML/HTML). These can be either filepaths (local files) or urls (remote files).
 - **output** `<string>` (*required*) Output file (PDF). Use the string `'-'` in order to output a stream instead of to a file.
-- **princeOptions** `<Object>` Options to pass to the `prince` command. For a list of available options, look [here](https://www.princexml.com/doc-refs/) or run `prince --help` in the CLI.
-- **execOptions** `<Object>` Options to pass to [`child_process.execFile`](https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback).
+- **options** `<Object>` Options to pass to the `prince` command. For a list of available options, look [here](https://www.princexml.com/doc-refs/) or run `prince --help` in the CLI.
 - **callback** `<Function>`
 	- **err** `<Error>`
 	- **stdout** `<string>` | `<Buffer>`
@@ -71,17 +70,14 @@ More options:
 ```js
 var Prince = require('@ravdocs/princexml');
 
-var princeOptions = {
+var options = {
 	'input': 'html',
 	'structured-log': 'normal',
 	'javascript': true,
 	'pdf-profile': 'PDF/A-3b'
 };
-var execOptions = {
-	timeout: 20 * 1000
-};
 
-Prince.exec('test.html', 'test.pdf', princeOptions, execOptions, function(err, stdout, stderr, meta) {
+Prince.exec('test.html', 'test.pdf', options, function(err, stdout, stderr, meta) {
 	if (err) throw err;
 
 	if (stdout.length) console.log('stdout:', stdout.toString());
@@ -168,13 +164,13 @@ Example:
 ```js
 var Prince = require('@ravdocs/princexml');
 
-var princeOptions = {
+var options = {
 	'debug': true,
 	'structured-log': 'normal',
 	'javascript': true
 };
 
-Prince.exec('test.html', 'test.pdf', princeOptions, null, function(err, stdout, stderr) {
+Prince.exec('test.html', 'test.pdf', options, null, function(err, stdout, stderr) {
 	if (err) throw err;
 
 	var logs = Prince.logs(stderr);

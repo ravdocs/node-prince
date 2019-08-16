@@ -15,8 +15,9 @@ describe('Prince.exec()', function() {
 		var stderrExpected = Buffer.from('');
 		var pathIn = (`${dir}/fixtures/basic.html`).replace(/\\/g, '/');
 		var pathOut = (`${dir}/outputs/basic.pdf`).replace(/\\/g, '/');
+		var options;
 
-		Prince.exec(pathIn, pathOut, null, null, function(err, stdout, stderr, meta) {
+		Prince.exec(pathIn, pathOut, options, function(err, stdout, stderr, meta) {
 			if (err) return done(err);
 
 			Assert.deepStrictEqual('stdout', stdout, stdoutExpected);
@@ -44,7 +45,10 @@ describe('Prince.exec()', function() {
 	});
 
 	it('should return pdf to stdout when output is \'-\'', function(done) {
-		Prince.exec(`${dir}/fixtures/basic.html`, '-', null, null, function(err, stdout) {
+		var input = `${dir}/fixtures/basic.html`;
+		var output = '-';
+		var options;
+		Prince.exec(input, output, options, function(err, stdout) {
 			if (err) return done(err);
 			Assert.isBuffer('stdout', stdout);
 			done();
@@ -52,9 +56,8 @@ describe('Prince.exec()', function() {
 	});
 
 	it('should not throw an error with javascript set to false', function(done) {
-		var execOptions = {};
-		var princeOptions = {javascript: false};
-		Prince.exec(`${dir}/fixtures/basic.html`, '-', princeOptions, execOptions, function(err, stdout) {
+		var options = {javascript: false};
+		Prince.exec(`${dir}/fixtures/basic.html`, '-', options, function(err, stdout) {
 			if (err) return done(err);
 			Assert.isBuffer('stdout', stdout);
 			done();

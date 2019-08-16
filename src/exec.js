@@ -90,16 +90,16 @@ function toErrExec(errExec) {
 	return errExec;
 }
 
-function composeArgs(inputs, output, princeOptions, next) {
+function composeArgs(inputs, output, options, next) {
 
 	Prove('AsOF', arguments);
 
 	var args = [];
 
 	// prince does not like javascript = false
-	princeOptions = prunePrinceOptions(princeOptions);
+	options = prunePrinceOptions(options);
 
-	ForOwn(princeOptions, function(value, name) {
+	ForOwn(options, function(value, name) {
 		var isFlag = (value === true);
 
 		args.push(`--${name}`);
@@ -179,17 +179,18 @@ function execute(args, options, next) {
 	});
 }
 
-module.exports = function(inputs, output, princeOptions, execFileOptions, next) {
+module.exports = function(inputs, output, options, next) {
 
-	Prove('*sooF', arguments);
+	Prove('*soF', arguments);
 
-	if (!inputs) inputs = [];
+	inputs = inputs || [];
+	options = options || {};
 	if (!Array.isArray(inputs)) inputs = [inputs];
-	if (!princeOptions) princeOptions = {};
-	if (!execFileOptions) execFileOptions = {};
+
+	var execFileOptions = {};
 	var checkInstall = (installed)? noopInstall : verifyInstall;
 
-	composeArgs(inputs, output, princeOptions, function(err, args) {
+	composeArgs(inputs, output, options, function(err, args) {
 		if (err) return next(err);
 
 		applyDefaults(execFileOptions, function(err, execFileOptions) {

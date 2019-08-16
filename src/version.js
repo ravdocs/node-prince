@@ -14,8 +14,10 @@ function appendPrinceVersion(buffer) {
 
 // version once during startup
 (function () {
-	var princeOptions = {version: true};
-	Exec(null, null, princeOptions, null, function(err, stdout) {
+	var input = null;
+	var output = null;
+	var options = {version: true};
+	Exec(input, output, options, function(err, stdout) {
 		if (err) throw err;
 
 		version = appendPrinceVersion(stdout);
