@@ -119,6 +119,7 @@ function applyDefaults(options, next) {
 
 	Prove('OF', arguments);
 	var defaults = {
+		'input': 'html',
 		'timeout': 30 * 1000, // millseconds
 		'maxBuffer': 10 * 1024 * 1024, // megabyte
 		'encoding': 'buffer',
