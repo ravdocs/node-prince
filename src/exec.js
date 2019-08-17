@@ -3,25 +3,18 @@
 var Prove = require('provejs-params');
 var ChildProcess = require('child_process');
 var Which = require('which');
-var SI = require('systeminformation');
 var ForOwn = require('lodash.forown');
 var Stopwatch = require('./stopwatch');
+var Logs = require('./logs');
 
 var installed = false;
 var command = 'prince';
 
 function prunePrinceOptions(options) {
-
 	// prince will throw an error when javascript is set to false
 	// prince: false: error: can't open input file: No such file or directory
 	if (options.javascript === false) delete options.javascript;
 	return options;
-}
-
-function memory(next) {
-	SI.mem().then(function (mem) {
-		next(null, mem);
-	}).catch(next);
 }
 
 function toCommand(args) {
@@ -37,57 +30,10 @@ function toCommand(args) {
 	return cmd;
 }
 
-
-function toMeta(args, duration, mem1, mem2) {
-
-	Prove('A*OO', arguments);
-
-	var meta = {
-		cmd: toCommand(args),
-		duration: duration,
-		memory: {
-			before: mem1,
-			after: mem2
-		}
-	};
-
-	return meta;
-}
-
-// If command timed out, i.e., errExec but no stderr, populate stderr with
-// an error message.
-function toStdErr(stderr, errExec, encoding) {
-
-	Prove('*eS', arguments);
-
-	// return early
-	if (!errExec) return stderr;
-	var timedout = (!stderr.toString().length);
-	if (!timedout) return stderr;
-
-	var msg = `msg|err|${command} timed out`;
-
-	return (encoding === 'buffer')
-		? Buffer.from(msg)
-		: Buffer.from(msg).toString(encoding);
-}
-
-// If command timed out, i.e., errExec.signal is SIGTERM, say so in the error
-// message.
-function toErrExec(errExec) {
-
-	Prove('e', arguments);
-
-	// return early
-	if (!errExec) return null;
-
-	var timedout = (errExec.signal === 'SIGTERM');
-	if (timedout) {
-		errExec.message = `${command} timed out: ${errExec.message}`;
-		errExec.timedout = true;
-	}
-
-	return errExec;
+function parseFirstPrinceError(stderr) {
+	// var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
+	var m = stderr.toString().match(/msg\|err\|([^\n]+)/);
+	return (m)? m[1].trim() : false;
 }
 
 function composeArgs(inputs, output, options, next) {
@@ -115,91 +61,109 @@ function composeArgs(inputs, output, options, next) {
 	process.nextTick(next, null, args);
 }
 
-function applyDefaults(options, next) {
+function reworkOptions(options, next) {
 
 	Prove('OF', arguments);
-	var defaults = {
+
+	// split off timeout
+	var timeout = options.timeout;
+	delete options.timeout;
+
+	var defaultsPrince = {
 		'input': 'html',
-		'timeout': 30 * 1000, // millseconds
-		'maxBuffer': 10 * 1024 * 1024, // megabyte
-		'encoding': 'buffer',
 		'profile': 'PDF/A-3b', //<--- eMortgage Standard
 		'structured-log': 'buffered', // avoid deadlocks
 		'http-timeout': 10 // only load from our servers so 10 seconds is a long time
 	};
-	options = Object.assign({}, defaults, options);
-	process.nextTick(next, null, options);
+	var defaultsExec = {
+		timeout: 30 * 1000, // millseconds
+		maxBuffer: 10 * 1024 * 1024, // megabyte
+		encoding: 'buffer'
+	};
+
+	var optsPrince = Object.assign({}, defaultsPrince, options);
+	var optsExec = Object.assign({}, defaultsExec, {timeout: timeout});
+
+	process.nextTick(next, null, optsPrince, optsExec);
 }
 
 function verifyInstall(next) {
 	Prove('F', arguments);
+
+	// return early, only need to verify install once
+	if (installed) return process.nextTick(next);
+
 	Which(command, function(err) {
-		if (err) return next(new Error(`Cannot find "${command}" binary. Verify that "${command}" is installed and is in the PATH.`));
+		if (err) return next(new Error(`Cannot find prince binary. Verify that prince is installed and is in the PATH.`));
 		installed = true;
 		next();
 	});
 }
 
-function noopInstall(next) {
-	process.nextTick(next);
-}
-
-function execute(args, options, next) {
+function runPrince(args, options, next) {
 
 	Prove('AOF', arguments);
 
-	memory(function(err, mem1) {
-		if (err) return next(err);
+	var stopwatch = new Stopwatch();
 
-		var stopwatch = new Stopwatch();
+	ChildProcess.execFile(command, args, options, function(err, pdf, stderr) {
 
-		ChildProcess.execFile(command, args, options, function(errExec, stdout, stderr) {
-			// handle error below - do not stop on errExec
+		// setup
+		var msg;
+		var encoding = options.encoding;
+		var timeout = options.timeout;
+		var cmd = toCommand(args);
+		var duration = stopwatch.stop(true);
+		var meta = {cmd: cmd, duration: duration};
+		var isTimeout = (err && err.signal === 'SIGTERM');
+		var logs = Logs(stderr);
 
-			var duration = stopwatch.stop(true);
 
-			memory(function(err, mem2) {
-				if (err) return next(err);
+		// humanize timeout error, and more importantly put humanized
+		// timeout error in stderr.
+		if (isTimeout) {
+			msg = `PDF rendering timed out after '${timeout}' milliseconds.`;
+			err = new Error(msg);
+			err.cmd = cmd;
+			stderr = (encoding === 'buffer')
+				? Buffer.from(msg)
+				: Buffer.from(msg).toString(encoding);
+			logs.push({type: 'error', source: 'engine/pdf', name: 'error', value: msg});
+		}
 
-				var meta = toMeta(args, duration, mem1, mem2);
-				var stderr2 = toStdErr(stderr, errExec, options.encoding);
-				var errExec2 = toErrExec(errExec);
+		// humanize prince `err` to just the first structure log error entry in `stderr`
+		if (err) {
+			msg = parseFirstPrinceError(stderr);
+			if (msg) err = new Error(msg);
+		}
 
-				// return early
-				if (errExec2) return next(errExec2, stdout, stderr2, meta);
+		// final cleanup
+		meta.output = stderr.toString();
 
-				// todo: If Prince returns an error status code in this scenario, then
-				// this condition will never be true, making this code unnecessary.
-				var m = stderr.toString().match(/prince:\s+error:\s+([^\n]+)/);
-				if (m) return next(new Error(m[1]), stdout, stderr, meta);
-
-				next(null, stdout, stderr, meta);
-			});
-		});
+		// return result
+		return next(err, pdf, logs, meta);
 	});
 }
 
 module.exports = function(inputs, output, options, next) {
 
-	Prove('*soF', arguments);
-
 	inputs = inputs || [];
 	options = options || {};
+
+	Prove('*soF', arguments);
+
 	if (!Array.isArray(inputs)) inputs = [inputs];
 
-	var execFileOptions = {};
-	var checkInstall = (installed)? noopInstall : verifyInstall;
-
-	composeArgs(inputs, output, options, function(err, args) {
+	reworkOptions(options, function(err, optsPrince, optsExec) {
 		if (err) return next(err);
 
-		applyDefaults(execFileOptions, function(err, execFileOptions) {
+		composeArgs(inputs, output, optsPrince, function(err, args) {
 			if (err) return next(err);
 
-			checkInstall(function(err) {
+			verifyInstall(function(err) {
 				if (err) return next(err);
 
-				execute(args, execFileOptions, function(err, stdout, stderr, meta) {
+				runPrince(args, optsExec, function(err, stdout, stderr, meta) {
 					if (err) return next(err, stdout, stderr, meta);
 
 					next(null, stdout, stderr, meta);

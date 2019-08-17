@@ -19,7 +19,9 @@ function toPages(num) {
 }
 
 exports.toHtml = function (options) {
+
 	var path = '/tmp/test.html';
+
 	options.pages = options.pages || 1;
 	var lines = [], html;
 	lines.push('<!DOCTYPE html>');
@@ -27,12 +29,14 @@ exports.toHtml = function (options) {
 	lines.push('<head>');
 	lines.push('<meta charset="utf-8"/>');
 	lines.push('<title>Test</title>');
+	if (options.invalid)	lines.push('<link href="https://google.com/invalid.css" rel="stylesheet">');
 	lines.push('</head>');
 	lines.push('<body>');
 	lines.push(toPages(options.pages));
 	lines.push('</body>');
 	lines.push('</html>');
 	html = lines.join('\n');
+	// console.log(html);
 
 	fs.writeFileSync(path, html);
 	return path;

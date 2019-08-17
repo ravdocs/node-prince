@@ -34,63 +34,36 @@ npm install @ravdocs/princexml
 Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around [`child_process.execFile`](https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback).
 
 - **inputs** `<string>` | `<string[]>` (*required*) Input file or files (XML/HTML). These can be either filepaths (local files) or urls (remote files).
-- **output** `<string>` (*required*) Output file (PDF). Use the string `'-'` in order to output a stream instead of to a file.
+- **output** `<string>` (*required*) Output file (PDF). Use the string `'-'` in order to output a buffer instead of to a file.
 - **options** `<Object>` Options to pass to the `prince` command. For a list of available options, look [here](https://www.princexml.com/doc-refs/) or run `prince --help` in the CLI.
 - **callback** `<Function>`
 	- **err** `<Error>`
-	- **stdout** `<string>` | `<Buffer>`
-	- **stderr** `<string>` | `<Buffer>`
+	- **pdf** ``<Buffer>`
+	- **logs** `<array>` Array of log data, parsed from stderr using option [`structured-log`](https://www.princexml.com/doc-prince/#structured-log).
 	- **meta** `<Object>`
 		- **cmd** `<string>` Command executed, including args.
-		- **duration** `<number>` Execution duration, in seconds, of the `prince` command. Uses [process.hrtime.bigint](https://nodejs.org/api/process.html#process_process_hrtime_bigint).
-		- **memoryFreeBefore** `<number>` Amount of system memory free, in MiB, before execution of the `prince` command. If the system does not have the command `free` (e.g., Windows), this value will be 0.
-		- **memoryFreeAfter** `<number>` Amount of system memory free, in MiB, after execution of the `prince` command. If the system does not have the command `free` (e.g., Windows), this value will be 0.
+		- **duration** `<number>` Execution duration, in seconds, of the `prince` command.
+		- **output** `<string>` Stderr output which is the same data as logs before being parsed.
 
 Basic example:
 
 ```js
 var Prince = require('@ravdocs/princexml');
+var options = {'javascript': true};
 
-Prince.exec('test.html', 'test.pdf', null, null, function(err, stdout, stderr, meta) {
+Prince.exec('test.html', 'test.pdf', options, function(err, pdf, logs, meta) {
 	if (err) throw err;
 
-	if (stdout.length) console.log('stdout:', stdout.toString());
-	if (stderr.length) console.log('stderr:', stderr.toString());
+	Assert.equal(Buffer.isBuffer(pdf), true);
+	Assert.equal(typeof logs, 'array');
+
 	console.log('meta.cmd:', meta.cmd);
 	console.log('meta.duration:', meta.duration);
-	console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
-	console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
+	console.log('meta.output', meta.output);
 
 	console.log('Finished.');
 });
 ```
-
-More options:
-
-```js
-var Prince = require('@ravdocs/princexml');
-
-var options = {
-	'input': 'html',
-	'structured-log': 'normal',
-	'javascript': true,
-	'pdf-profile': 'PDF/A-3b'
-};
-
-Prince.exec('test.html', 'test.pdf', options, function(err, stdout, stderr, meta) {
-	if (err) throw err;
-
-	if (stdout.length) console.log('stdout:', stdout.toString());
-	if (stderr.length) console.log('stderr:', stderr.toString());
-	console.log('meta.cmd:', meta.cmd);
-	console.log('meta.duration:', meta.duration);
-	console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
-	console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
-
-	console.log('Finished.');
-});
-```
-
 Sending the output in an HTTP response:
 
 ```js
@@ -100,15 +73,14 @@ var app = Express();
 
 app.get('/', function(req, res) {
 
-	Prince.exec('test.html', '-', null, null, function(err, stdout, stderr, meta) {
-		if (err) return res.status(500).send(stderr);
+	Prince.exec('test.html', '-', null, function(err, pdf, logs, meta) {
+		if (err) return res.status(500).json(logs);
 
 		console.log('meta.cmd:', meta.cmd);
 		console.log('meta.duration:', meta.duration);
-		console.log('meta.memoryFreeBefore:', meta.memoryFreeBefore);
-		console.log('meta.memoryFreeAfter:', meta.memoryFreeAfter);
+		console.log('meta.output:', meta.output);
 
-		res.contentType('application/pdf').send(stdout);
+		res.type('pdf').send(pdf);
 	});
 });
 
@@ -117,24 +89,15 @@ app.listen(3000);
 
 ## Prince.version()
 
-Returns version information about this NPM module and the PrinceXML software installed. If you call Prince.version() within the first 100 ms than you will get just the package verison. However, a short time (~100 ms) the returned string will also include the version.
-
-Example:
+Returns version information about this NPM module and the PrinceXML software installed.
 
 ```js
 var Prince = require('@ravdocs/princexml');
 
-var version = Prince.version();
-console.log('version', version);
-```
-
-Output:
-
-```text
-@ravdocs/princexml 1.5.4
-Prince 12
-Copyright 2002-2018 YesLogic Pty. Ltd.
-Non-commercial License
+Prince.version(function(err, version) {
+	if (err) throw err;
+	console.log(version); // `@ravdocs/princxml x.y.z (Prince 12.5)`
+});
 ```
 
 ## Prince.logs()
@@ -147,48 +110,20 @@ Extracts any [structured logs](https://www.princexml.com/doc-prince/#structured-
 	- **name** `<string>` The name or label of the log.
 	- **value** `<string>` The descriptive content of the log.
 
-When the `type` of a `log` is 'status', its `name` is ''.
+Parsing:
 
-When the `type` of a `log` is 'message', its `name` is 'error', 'warning', 'info', 'debug', or 'output'.
-
-When the `type` of a `log` is 'progress', its `name` is 'percent'.
-
-When the `type` of a `log` is 'data', its `name` and `value` are the arguments passed to [`Log.data('name', 'value')`](https://www.princexml.com/doc-prince/#js-logging).
-
-When the `type` of a `log` is 'final', its `name` is 'outcome', and its `value` is either 'success' or 'failure'.
+- When the `type` of a `log` is 'status', its `name` is ''.
+- When the `type` of a `log` is 'message', its `name` is 'error', 'warning', 'info', 'debug', or 'output'.
+- When the `type` of a `log` is 'progress', its `name` is 'percent'.
+- When the `type` of a `log` is 'data', its `name` and `value` are the arguments passed to [`Log.data('name', 'value')`](https://www.princexml.com/doc-prince/#js-logging).
+- When the `type` of a `log` is 'final', its `name` is 'outcome', and its `value` is either 'success' or 'failure'.
 
 Note that the [`structured-log`](https://www.princexml.com/doc-prince/#structured-log) option must have been passed to [`Prince.exec()`](#princeexec) in order for this method to be able to extract any logs from the stderr.
 
-Example:
-
-```js
-var Prince = require('@ravdocs/princexml');
-
-var options = {
-	'debug': true,
-	'structured-log': 'normal',
-	'javascript': true
-};
-
-Prince.exec('test.html', 'test.pdf', options, null, function(err, stdout, stderr) {
-	if (err) throw err;
-
-	var logs = Prince.logs(stderr);
-
-	logs.forEach(function(log) {
-		if (log.type === 'status') {
-			console.log(`${log.type}|${log.value}`);
-		} else {
-			console.log(`${log.type}|${log.name}|${log.value}`);
-		}
-	});
-
-	console.log(logs);
-});
-```
 
 ## Prince Options
 
+For reference only, below are the prince options.
 
 ```js
 // the officially support options of prince(1)

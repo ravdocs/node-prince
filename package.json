@@ -1,6 +1,6 @@
 {
   "name": "@ravdocs/princexml",
-  "version": "2.0.15",
+  "version": "2.0.16",
   "description": "Node API for executing XML/HTML to PDF renderer PrinceXML via prince(1) CLI",
   "keywords": [
     "API",
@@ -38,7 +38,6 @@
   "dependencies": {
     "lodash.forown": "^4.4.0",
     "provejs-params": "^1.0.1",
-    "systeminformation": "^4.14.4",
     "which": "^1.3.1"
   },
   "devDependencies": {

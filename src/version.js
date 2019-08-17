@@ -2,29 +2,27 @@
 
 var Pkg = require('../package.json');
 var Exec = require('./exec');
-var version = `${Pkg.name} ${Pkg.version}`;
+var version;
 
-function appendPrinceVersion(buffer) {
+function toVersion(buffer) {
 	var mltext = buffer.toString();
 	var parts = mltext.split('\n');
 	var pv = parts[0].trim();
-	var out = version + ` (${pv})`;
+	var out = `${Pkg.name} ${Pkg.version} (${pv})`;
 	return out;
 }
 
-// version once during startup
-(function () {
-	var input = null;
-	var output = null;
+module.exports = function(next) {
+	var input, output;
 	var options = {version: true};
+
+	// return early
+	if (version) return process.nextTick(next, null, version);
+
 	Exec(input, output, options, function(err, stdout) {
-		if (err) throw err;
+		if (err) return next(err);
 
-		version = appendPrinceVersion(stdout);
+		version = toVersion(stdout);
+		next(null, version);
 	});
-}());
-
-
-module.exports = function() {
-	return version;
 };

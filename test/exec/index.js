@@ -8,38 +8,24 @@ var Fixtures = require('../fixtures');
 var dir = __dirname + '/..';
 
 describe('Prince.exec()', function() {
-	this.timeout(10000);
+	this.timeout(40000);
 
 	it('should return data in correct format', function(done) {
 
-		var stdoutExpected = Buffer.from('');
-		var stderrExpected = Buffer.from('');
 		var pathIn = (`${dir}/fixtures/basic.html`).replace(/\\/g, '/');
 		var pathOut = (`${dir}/outputs/basic.pdf`).replace(/\\/g, '/');
 		var options;
 
-		Prince.exec(pathIn, pathOut, options, function(err, stdout, stderr, meta) {
+		Prince.exec(pathIn, pathOut, options, function(err, pdf, logs, meta) {
 			if (err) return done(err);
 
-			Assert.deepStrictEqual('stdout', stdout, stdoutExpected);
-			Assert.deepStrictEqual('stderr', stderr, stderrExpected);
-
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
 			Assert.isObject('meta', meta);
 			Assert.isString('meta.cmd', meta.cmd);
 			Assert.isNumber('meta.duration', meta.duration);
-			Assert.isObject('meta.memory', meta.memory);
-			Assert.isObject('meta.memory.before', meta.memory.before);
-			Assert.isObject('meta.memory.after', meta.memory.after);
-
-			// on linux we care more about "available" memory than "free" memory
-			// https://www.linuxatemyram.com/
-			Assert.isNumber('meta.memory.before.available', meta.memory.before.available);
-			Assert.isNumber('meta.memory.after.available', meta.memory.after.available);
-
-			var cmd = (`prince '${pathIn}' --output '${pathOut}'`);
-
-			Assert.strictEqual('meta.cmd', meta.cmd, cmd);
 			Assert.isGreaterThan('meta.duration', meta.duration, 0);
+			Assert.isString('meta.output', meta.output);
 
 			done();
 		});
@@ -49,31 +35,67 @@ describe('Prince.exec()', function() {
 		var input = `${dir}/fixtures/basic.html`;
 		var output = '-';
 		var options;
-		Prince.exec(input, output, options, function(err, stdout) {
+		Prince.exec(input, output, options, function(err, pdf, logs, meta) {
 			if (err) return done(err);
-			Assert.isBuffer('stdout', stdout);
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
+			Assert.isObject('meta', meta);
 			done();
 		});
 	});
 
 	it('should not throw an error with javascript set to false', function(done) {
 		var options = {javascript: false};
-		Prince.exec(`${dir}/fixtures/basic.html`, '-', options, function(err, stdout) {
+		Prince.exec(`${dir}/fixtures/basic.html`, '-', options, function(err, pdf, logs) {
 			if (err) return done(err);
-			Assert.isBuffer('stdout', stdout);
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
 			done();
 		});
 	});
 
+	it('should return `err` on 1 ms timeout and timeout should be in logs', function(done) {
+		var options = {timeout: 1};
+		var output = '-';
+		var input = Fixtures.toHtml({pages: 50, invalid: false});
+		var expected = {type: 'error', source: 'engine/pdf', name: 'error', value: 'PDF rendering timed out after \'1\' milliseconds.'};
 
-	it('should not throw an error with 500 pages', function(done) {
+		Prince.exec(input, output, options, function(err, pdf, logs, meta) {
+			Assert.isError('err', err);
+			Assert.strictEqual('err.message', "PDF rendering timed out after '1' milliseconds.", err.message);
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
+			Assert.deepStrictEqual('logs[0]', expected, logs[0]);
+			Assert.strictEqual('meta.output', "PDF rendering timed out after '1' milliseconds.", meta.output);
+			done();
+		});
+	});
 
+	it('should handle 1000 page pdf', function(done) {
 		var options = {};
 		var output = '-';
-		var input = Fixtures.toHtml({pages: 500});
-		Prince.exec(input, output, options, function(err, stdout) {
+		var input = Fixtures.toHtml({pages: 1000, invalid: false});
+
+		Prince.exec(input, output, options, function(err, pdf, logs, meta) {
 			if (err) throw err;
-			Assert.isBuffer('stdout', stdout);
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
+			Assert.isObject('meta', meta);
+			done();
+		});
+	});
+
+	it('should humanize `err` to the first error in `logs`', function(done) {
+		var options = {};
+		var output = '-';
+		var input = 'non-existent.html';
+
+		Prince.exec(input, output, options, function(err, pdf, logs, meta) {
+			Assert.isError('err', err);
+			Assert.strictEqual('err.message', "non-existent.html|can't open input file: No such file or directory", err.message);
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
+			Assert.isObject('meta', meta);
 			done();
 		});
 	});

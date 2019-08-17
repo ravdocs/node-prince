@@ -7,21 +7,13 @@ var Pkg = require('../../package.json');
 
 describe('Prince.version()', function() {
 
-	it('should return package version and may include prince version immediately', function(done) {
-		var actual = Prince.version();
-		var expected = `${Pkg.name} ${Pkg.version}`;
-		var startsWith = actual.indexOf(expected) === 0;
-		Assert.strictEqual('version', startsWith, true);
-		done();
-	});
+	it('should return version', function(done) {
 
-	it('should return package version with prince version shortly later', function(done) {
-
-		setTimeout(function() {
-			var actual = Prince.version();
+		Prince.version(function (err, actual) {
+			if (err) throw err;
 			var expected = `${Pkg.name} ${Pkg.version} (Prince 12.5)`;
-			Assert.deepStrictEqual('version', actual, expected);
+			Assert.strictEqual('version', actual, expected);
 			done();
-		}, 100);
+		});
 	});
 });
