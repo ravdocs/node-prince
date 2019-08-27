@@ -113,11 +113,9 @@ function runPrince(inputs, args, options, next) {
 
 	Prove('AAOF', arguments);
 
-	var singleInput = (inputs.length === 1);
-	var input = (singleInput) ? inputs[0] : null;
 	var stopwatch = new Stopwatch();
 
-	var exec = ChildProcess.execFile(command, args, options, function(err, pdf, stderr) {
+	execCommand(inputs, args, options, function(err, pdf, stderr) {
 
 		// setup
 		var msg;
@@ -154,6 +152,16 @@ function runPrince(inputs, args, options, next) {
 		// return result
 		return next(err, pdf, logs, meta);
 	});
+}
+
+function execCommand(inputs, args, options, next) {
+
+	Prove('AAOF', arguments);
+
+	var singleInput = (inputs.length === 1);
+	var input = (singleInput) ? inputs[0] : null;
+
+	var exec = ChildProcess.execFile(command, args, options, next);
 
 	if (singleInput && Buffer.isBuffer(input)) {
 		exec.stdin.end(input);
