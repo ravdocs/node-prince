@@ -33,7 +33,7 @@ npm install @ravdocs/princexml
 
 Execute the `prince` command to convert XML/HTML to PDF. It is a wrapper around [`child_process.execFile`](https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback).
 
-- **inputs** `<string>` | `<string[]>` (*required*) Input file or files (XML/HTML). These can be either filepaths (local files) or urls (remote files).
+- **inputs** `<string>` | `<string[]>` | `Buffer` | `stream.Writable` (*required*) Input file or files (XML/HTML). These can be either filepaths (local files) or urls (remote files). If it is a `Buffer` or a `stream.Writable`, it is piped to the [`stdin`](https://nodejs.org/api/child_process.html#child_process_subprocess_stdin) of the [`child_process.execFile`](https://nodejs.org/api/child_process.html#child_process_child_process_execfile_file_args_options_callback) subprocess.
 - **output** `<string>` (*required*) Output file (PDF). Use the string `'-'` in order to output a buffer instead of to a file.
 - **options** `<Object>` Options to pass to the `prince` command. For a list of available options, look [here](https://www.princexml.com/doc-refs/) or run `prince --help` in the CLI.
 - **callback** `<Function>`
@@ -64,6 +64,7 @@ Prince.exec('test.html', 'test.pdf', options, function(err, pdf, logs, meta) {
 	console.log('Finished.');
 });
 ```
+
 Sending the output in an HTTP response:
 
 ```js
@@ -85,6 +86,62 @@ app.get('/', function(req, res) {
 });
 
 app.listen(3000);
+```
+
+Passing in a `Buffer` input:
+
+```js
+var Prince = require('@ravdocs/princexml');
+var Request = require('request');
+
+var requestOptions = {
+	method: 'GET',
+	url: 'http://localhost:3000/test.html',
+	encoding: null // Buffer
+};
+
+Request(requestOptions, function(err, res, buffer) {
+	if (err) throw err;
+	if (res.statusCode !== 200) throw new Error('Bad response');
+
+	Prince.exec(buffer, 'test.pdf', null, function(err, pdf, logs, meta) {
+		if (err) throw err;
+
+		console.log('meta.cmd:', meta.cmd);
+		console.log('meta.duration:', meta.duration);
+		console.log('meta.output:', meta.output);
+
+		console.log('Finished.');
+	});
+});
+```
+
+Passing in a `stream.Writable` input:
+
+```js
+var Prince = require('@ravdocs/princexml');
+var Request = require('request');
+
+var requestOptions = {
+	method: 'GET',
+	url: 'http://localhost:3000/test.html'
+};
+
+var stream = Request(requestOptions);
+
+stream.on('error', function(err) {
+	throw err;
+});
+
+Prince.exec(stream, 'test.pdf', null, function(err, pdf, logs, meta) {
+	if (err) throw err;
+
+	console.log('meta.cmd:', meta.cmd);
+	console.log('meta.duration:', meta.duration);
+	console.log('meta.output:', meta.output);
+
+	console.log('Finished.');
+});
 ```
 
 ## Prince.version()

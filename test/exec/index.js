@@ -3,6 +3,7 @@
 'use strict';
 
 var Assert = require('@ravdocs/assert');
+var FS = require('fs');
 var Prince = require('../..');
 var Fixtures = require('../fixtures');
 var dir = __dirname + '/..';
@@ -96,6 +97,53 @@ describe('Prince.exec()', function() {
 			Assert.isBuffer('pdf', pdf);
 			Assert.isArray('logs', logs);
 			Assert.isObject('meta', meta);
+			done();
+		});
+	});
+
+	it('should accept input of type \'Buffer\'', function(done) {
+
+		var pathIn = (`${dir}/fixtures/basic.html`).replace(/\\/g, '/');
+		var pathOut = (`${dir}/outputs/basic.pdf`).replace(/\\/g, '/');
+		var options;
+
+		FS.readFile(pathIn, function(err, bufferIn) {
+			if (err) return done(err);
+
+			Prince.exec(bufferIn, pathOut, options, function(err, pdf, logs, meta) {
+				if (err) return done(err);
+
+				Assert.isBuffer('pdf', pdf);
+				Assert.isArray('logs', logs);
+				Assert.isObject('meta', meta);
+				Assert.isString('meta.cmd', meta.cmd);
+				Assert.isNumber('meta.duration', meta.duration);
+				Assert.isGreaterThan('meta.duration', meta.duration, 0);
+				Assert.isString('meta.output', meta.output);
+
+				done();
+			});
+		});
+	});
+
+	it('should accept input of type \'stream.Writable\'', function(done) {
+
+		var pathIn = (`${dir}/fixtures/basic.html`).replace(/\\/g, '/');
+		var pathOut = (`${dir}/outputs/basic.pdf`).replace(/\\/g, '/');
+		var options;
+		var streamIn = FS.createReadStream(pathIn);
+
+		Prince.exec(streamIn, pathOut, options, function(err, pdf, logs, meta) {
+			if (err) return done(err);
+
+			Assert.isBuffer('pdf', pdf);
+			Assert.isArray('logs', logs);
+			Assert.isObject('meta', meta);
+			Assert.isString('meta.cmd', meta.cmd);
+			Assert.isNumber('meta.duration', meta.duration);
+			Assert.isGreaterThan('meta.duration', meta.duration, 0);
+			Assert.isString('meta.output', meta.output);
+
 			done();
 		});
 	});

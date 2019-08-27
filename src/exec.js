@@ -4,6 +4,7 @@ var Prove = require('provejs-params');
 var ChildProcess = require('child_process');
 var Which = require('which');
 var ForOwn = require('lodash.forown');
+var IsStream = require('is-stream');
 var Stopwatch = require('./stopwatch');
 var Logs = require('./logs');
 
@@ -40,6 +41,8 @@ function composeArgs(inputs, output, options, next) {
 
 	Prove('AsOF', arguments);
 
+	var singleInput = (inputs.length === 1);
+	var input = (singleInput) ? inputs[0] : null;
 	var args = [];
 
 	// prince does not like javascript = false
@@ -52,7 +55,13 @@ function composeArgs(inputs, output, options, next) {
 		if (!isFlag) args.push(value);
 	});
 
-	args = args.concat(inputs);
+	if (singleInput && Buffer.isBuffer(input)) {
+		args.push('-');
+	} else if (singleInput && IsStream(input)) {
+		args.push('-');
+	} else {
+		args = args.concat(inputs);
+	}
 
 	// required from Prince 11 on, supported since Prince 7
 	args.push('--output');
@@ -100,13 +109,15 @@ function verifyInstall(next) {
 	});
 }
 
-function runPrince(args, options, next) {
+function runPrince(inputs, args, options, next) {
 
-	Prove('AOF', arguments);
+	Prove('AAOF', arguments);
 
+	var singleInput = (inputs.length === 1);
+	var input = (singleInput) ? inputs[0] : null;
 	var stopwatch = new Stopwatch();
 
-	ChildProcess.execFile(command, args, options, function(err, pdf, stderr) {
+	var exec = ChildProcess.execFile(command, args, options, function(err, pdf, stderr) {
 
 		// setup
 		var msg;
@@ -143,6 +154,12 @@ function runPrince(args, options, next) {
 		// return result
 		return next(err, pdf, logs, meta);
 	});
+
+	if (singleInput && Buffer.isBuffer(input)) {
+		exec.stdin.end(input);
+	} else if (singleInput && IsStream(input)) {
+		input.pipe(exec.stdin);
+	}
 }
 
 module.exports = function(inputs, output, options, next) {
@@ -163,7 +180,7 @@ module.exports = function(inputs, output, options, next) {
 			verifyInstall(function(err) {
 				if (err) return next(err);
 
-				runPrince(args, optsExec, function(err, pdf, logs, meta) {
+				runPrince(inputs, args, optsExec, function(err, pdf, logs, meta) {
 					if (err) return next(err, pdf, logs, meta);
 
 					next(null, pdf, logs, meta);
