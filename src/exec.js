@@ -163,10 +163,10 @@ module.exports = function(inputs, output, options, next) {
 			verifyInstall(function(err) {
 				if (err) return next(err);
 
-				runPrince(args, optsExec, function(err, stdout, stderr, meta) {
-					if (err) return next(err, stdout, stderr, meta);
+				runPrince(args, optsExec, function(err, pdf, logs, meta) {
+					if (err) return next(err, pdf, logs, meta);
 
-					next(null, stdout, stderr, meta);
+					next(null, pdf, logs, meta);
 				});
 			});
 		});
