@@ -57,7 +57,7 @@ function composeArgs(inputs, output, options, next) {
 
 	if (singleInput && Buffer.isBuffer(input)) {
 		args.push('-');
-	} else if (singleInput && IsStream(input)) {
+	} else if (singleInput && IsStream.writable(input)) {
 		args.push('-');
 	} else {
 		args = args.concat(inputs);
@@ -165,7 +165,7 @@ function execCommand(inputs, args, options, next) {
 
 	if (singleInput && Buffer.isBuffer(input)) {
 		exec.stdin.end(input);
-	} else if (singleInput && IsStream(input)) {
+	} else if (singleInput && IsStream.writable(input)) {
 		input.pipe(exec.stdin);
 	}
 }
